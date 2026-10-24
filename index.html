@@ -1108,24 +1108,32 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   (async function(){
     if(new URLSearchParams(location.search).get("manage")!=="1")return;
     const adminHash="5a02f98d1e79b9708000f9896413f3ccb47077f472edce041eaef214dd1233dd";
-    let authorized=false;
-    try{authorized=sessionStorage.getItem("alarabin-owner-session-v1")==="ok"}catch(e){}
-    if(!authorized){
-      const supplied=window.prompt("إدارة الموقع للمدرب فقط. اكتب رمز الإدارة الخاص:");
-      if(supplied===null)return;
-      try{
-        const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(supplied));
-        const actual=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
-        authorized=actual===adminHash;
-      }catch(e){authorized=false}
-      if(!authorized){window.alert("رمز الإدارة غير صحيح. رابط المشتركين العادي يبقى متاحاً.");return}
-      try{sessionStorage.setItem("alarabin-owner-session-v1","ok")}catch(e){}
-    }
-    window.__alarabinOwnerAuthorized=true;
     const entry=document.getElementById("manage-entry"),guide=document.getElementById("manage-guide");
-    if(entry)entry.hidden=false;
-    if(guide)guide.hidden=false;
-    if(typeof window.syncLibraryGate==="function")window.syncLibraryGate();
+    function enableAdmin(){
+      window.__alarabinOwnerAuthorized=true;
+      if(entry)entry.hidden=false;
+      if(guide)guide.hidden=false;
+      if(typeof window.syncLibraryGate==="function")window.syncLibraryGate();
+      const overlay=document.getElementById("owner-login-overlay");if(overlay)overlay.remove();
+    }
+    try{if(sessionStorage.getItem("alarabin-owner-session-v1")==="ok"){enableAdmin();return}}catch(e){}
+    const overlay=document.createElement("div");overlay.id="owner-login-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-labelledby","owner-login-title");
+    overlay.style.cssText="position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:#080a08ed;direction:rtl";
+    overlay.innerHTML='<form id="owner-login-form" style="width:min(430px,100%);padding:24px;border:1px solid #46513c;border-radius:20px;background:#171a16;box-shadow:0 24px 80px #000a;color:#f2f2e9;font-family:IBM Plex Sans Arabic,sans-serif"><h2 id="owner-login-title" style="margin:0 0 7px;font-size:21px">إدارة الموقع للمدرب فقط</h2><p style="margin:0 0 16px;color:#a1a79c;font-size:13px;line-height:1.8">اكتب رمز الإدارة حتى تظهر أدوات تعديل وإضافة التمارين.</p><label for="owner-login-code" style="display:block;margin-bottom:6px;font-size:12px">رمز الإدارة</label><input id="owner-login-code" type="password" autocomplete="current-password" required style="width:100%;padding:12px;border:1px solid #3b4435;border-radius:11px;background:#10130f;color:#f2f2e9;font:inherit"><div style="display:flex;gap:8px;margin-top:13px"><button type="submit" style="flex:1;padding:11px;border:1px solid #c5f36b;border-radius:10px;background:#c5f36b;color:#171a14;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">دخول الإدارة</button><button id="owner-login-cancel" type="button" style="padding:11px;border:1px solid #46513c;border-radius:10px;background:#20251d;color:#e5efd7;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">رجوع للموقع</button></div><p id="owner-login-status" role="status" aria-live="polite" style="min-height:22px;margin:10px 0 0;color:#c5f36b;font-size:12px"></p></form>';
+    document.body.appendChild(overlay);
+    const loginForm=overlay.querySelector("#owner-login-form"),loginCode=overlay.querySelector("#owner-login-code"),loginStatus=overlay.querySelector("#owner-login-status");
+    overlay.querySelector("#owner-login-cancel").addEventListener("click",()=>overlay.remove());
+    loginForm.addEventListener("submit",async event=>{
+      event.preventDefault();loginStatus.textContent="";
+      try{
+        const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(loginCode.value));
+        const actual=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
+        if(actual!==adminHash){loginStatus.textContent="رمز الإدارة غير صحيح.";loginCode.select();return}
+        try{sessionStorage.setItem("alarabin-owner-session-v1","ok")}catch(e){}
+        enableAdmin();
+      }catch(e){loginStatus.textContent="تعذر التحقق بهذا المتصفح. افتح الموقع من الرابط الرسمي وحاول مرة ثانية."}
+    });
+    loginCode.focus();
   })();
   </script>
 </body>
