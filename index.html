@@ -19,6 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="workout-tracker.css">
   <style>
     :root{--bg:#10120f;--panel:#171a16;--panel2:#1d211c;--line:#30352e;--text:#f2f2e9;--muted:#a1a79c;--lime:#c5f36b;--lime-dark:#93c83d;--warm:#f5a46e;--blue:#9bd7d0;--radius:22px;--max:1200px}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans Arabic",sans-serif;line-height:1.65}button,input{font:inherit}a{color:inherit;text-decoration:none}button{cursor:pointer;color:inherit}::selection{background:var(--lime);color:#171a16}
@@ -155,8 +156,11 @@
         <h3>مكتبة التمارين للمشتركين فقط</h3>
         <p>اكتب رمز الاشتراك حتى تفتح التمارين والفيديوهات. باقي خانات الموقع مجانية.</p>
         <form class="library-unlock-form" id="library-unlock-form">
+          <label for="library-member-name">الاسم الثنائي</label>
+          <input id="library-member-name" name="member-name" type="text" autocomplete="name" placeholder="مثال: أحمد محمد" required>
           <label for="library-access-code">رمز الدخول</label>
           <input id="library-access-code" name="code" type="password" inputmode="text" autocomplete="current-password" placeholder="اكتب الرمز هنا" required>
+          <p class="library-name-notice">بعد فتح المكتبة، يفتح واتساب برسالة باسمك فقط. اضغط إرسال حتى يوصل اسمك للمدرب.</p>
           <button type="submit">فتح مكتبة التمارين</button>
           <p class="library-lock-status" id="library-lock-status" role="status" aria-live="polite"></p>
         </form>
@@ -1028,7 +1032,9 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   const status=document.getElementById("library-lock-status");
   if(!lock||!protectedContent||!form)return;
   function ownerMode(){return new URLSearchParams(location.search).get("manage")==="1"}
-  function unlocked(){try{return ownerMode()||localStorage.getItem(storageKey)===accessCode}catch(e){return ownerMode()}}
+  const memberNameInput=document.getElementById("library-member-name");
+  function memberName(){try{return sessionStorage.getItem("alarabin-member-name-v1")||""}catch(e){return ""}}
+  function unlocked(){try{return ownerMode()||(localStorage.getItem(storageKey)===accessCode&&memberName().trim().split(/\s+/).filter(Boolean).length>=2)}catch(e){return ownerMode()}}
   function syncGate(){
     const allowed=unlocked();
     lock.hidden=allowed;
@@ -1037,6 +1043,12 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   }
   form.addEventListener("submit",function(event){
     event.preventDefault();
+    const fullName=memberNameInput?memberNameInput.value.trim().replace(/\s+/g," "):"";
+    if(fullName.split(" ").filter(Boolean).length<2){
+      status.textContent="اكتب الاسم الثنائي حتى ينحفظ سجلّك باسمك.";
+      if(memberNameInput)memberNameInput.focus();
+      return;
+    }
     if(input.value.trim().replace(/\s+/g,"").toUpperCase()!==accessCode){
       status.textContent="الرمز مو صحيح. تأكد من كتابته وحاول مرة ثانية.";
       input.focus();
@@ -1044,6 +1056,13 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
       return;
     }
     try{localStorage.setItem(storageKey,accessCode)}catch(e){}
+    try{sessionStorage.setItem("alarabin-member-name-v1",fullName)}catch(e){}    let sendNameNotice=false;
+    const noticeKey="alarabin-name-notice-v1:"+fullName.toLocaleLowerCase("ar");
+    try{sendNameNotice=localStorage.getItem(noticeKey)!=="opened";if(sendNameNotice)localStorage.setItem(noticeKey,"opened")}catch(e){sendNameNotice=true}
+    if(sendNameNotice){
+      const nameMessage="مشترك جديد سجل بمكتبة تمارين العرابين. الاسم الثنائي: "+fullName;
+      window.open("https://wa.me/9647711120604?text="+encodeURIComponent(nameMessage),"_blank","noopener,noreferrer");
+    }
     status.textContent="";
     syncGate();
   });
@@ -1083,5 +1102,6 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
       if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     })();
   </script>
+  <script src="workout-tracker.js"></script>
 </body>
 </html>
