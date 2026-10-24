@@ -30,7 +30,7 @@
     reps:panel.querySelector('#workout-reps')
   };
   const keyPrefix='alarabin-workout-log-v1:';
-  const ownerMode=new URLSearchParams(location.search).get('manage')==='1';
+  function ownerMode(){return window.__alarabinOwnerAuthorized===true}
   let editingId=null;
   let pendingFollowupAt=null;
 
@@ -40,10 +40,10 @@
   function normalizedName(name){return name.trim().replace(/\s+/g,' ').toLocaleLowerCase('ar')}
   function storageKey(){
     const name=memberName();
-    return keyPrefix+encodeURIComponent(normalizedName(name||(ownerMode?'مصطفى قاسم':'')));
+    return keyPrefix+encodeURIComponent(normalizedName(name||(ownerMode()?'مصطفى قاسم':'')));
   }
   function followupKey(){
-    return keyPrefix+'followup:'+encodeURIComponent(normalizedName(memberName()||(ownerMode?'مصطفى قاسم':'')));
+    return keyPrefix+'followup:'+encodeURIComponent(normalizedName(memberName()||(ownerMode()?'مصطفى قاسم':'')));
   }
   function readRecords(){
     try{const value=JSON.parse(localStorage.getItem(storageKey())||'[]');return Array.isArray(value)?value:[]}catch(error){return []}
@@ -174,11 +174,11 @@
 
   form.addEventListener('submit',event=>{
     event.preventDefault();
-    if(!memberName()&&!ownerMode){status.textContent='افتح المكتبة باسمك الثنائي حتى ينحفظ السجل بحسابك.';return}
+    if(!memberName()&&!ownerMode()){status.textContent='افتح المكتبة باسمك الثنائي حتى ينحفظ السجل بحسابك.';return}
     const now=new Date().toISOString();
     const record={
       id:editingId||((window.crypto&&window.crypto.randomUUID)?window.crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2)),
-      name:memberName()||(ownerMode?'مصطفى قاسم':''),
+      name:memberName()||(ownerMode()?'مصطفى قاسم':''),
       exercise:fields.exercise.value.trim(),
       lastWeight:fields.lastWeight.value===''?null:Number(fields.lastWeight.value),
       weekWeight:Number(fields.weekWeight.value),

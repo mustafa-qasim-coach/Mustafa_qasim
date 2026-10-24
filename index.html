@@ -174,7 +174,7 @@
       <details id="manage-guide" class="manage-guide" hidden style="margin:-6px 0 18px;padding:14px 16px;border:1px solid #3b4435;border-radius:14px;background:#171c15;color:#d9e2d0;font-size:12px;line-height:1.9">
         <summary style="cursor:pointer;color:var(--lime);font-weight:700">شلون أستخدم الإدارة؟ (خطوة بخطوة)</summary>
         <ol style="margin:9px 18px 0 0;padding-right:16px">
-          <li>افتح الموقع مع <code>?manage=1</code> بنهاية الرابط حتى يظهر زر «إدارة التمارين».</li>
+          <li>افتح رابط الإدارة مع <code>?manage=1</code>، واكتب رمز المدرب الخاص. لا ترسل هذا الرمز أو رابط الإدارة للمشتركين.</li>
           <li>اضغط «إدارة التمارين»، وبعدها «أضف تمرين» أو «تعديل» تحت التمرين المطلوب.</li>
           <li>عدّل الاسم العربي والإنكليزي، العضلة المستهدفة، الصورة، الفيديو، الأدوات، المستوى، المجموعات والتكرارات، الوصف ونقاط التذكير.</li>
           <li>ارفع الفيديو إلى YouTube واجعل الخصوصية «غير مُدرج»، ثم انسخ الرابط والصقه بحقل الفيديو. يوتيوب يجيب صورة مصغّرة تلقائياً؛ لا تحتاج ترفع ملفات الفيديو الكبيرة مع الموقع.</li>
@@ -979,7 +979,7 @@ const initialFoods = [
     document.getElementById("export-site").addEventListener("click",function(){let source="<!doctype html>\n"+document.documentElement.outerHTML,embedded=JSON.stringify(exercises,null,2).replace(/</g,"\\u003c");source=source.replace(/    const exerciseVideoIds=\{[^;]+\};\s*initialExercises\.forEach\(ex=>\{[\s\S]*?\}\);\s*/,"");source=source.replace(/const initialExercises = [\s\S]*?\n\s*const initialFoods = \[/,"const initialExercises = "+embedded+";\n    const initialFoods = [");source=source.replace(/const initialFoods = \[[\s\S]*?\];/,"const initialFoods = "+JSON.stringify(foods,null,2).replace(/</g,"\\u003c")+";");source=source.replace(/const foodVersion="[^"]+";/,'const foodVersion="v'+Date.now().toString(36)+'";');source=source.replace(/const contentVersion="[^"]+";/,'const contentVersion="v'+Date.now().toString(36)+'";');let blob=new Blob([source],{type:"text/html;charset=utf-8"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="alarabin-mustafa-qasim.html";document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);document.getElementById("manage-message").textContent="تنزّلت نسخة الموقع. سمّها index.html وارفعها بدل النسخة القديمة حتى تظهر التعديلات للمشتركين."});
     function openVideo(id){let ex=exercises.find(e=>e.id===id);if(!ex)return;document.getElementById("modal-title").textContent=ex.name;document.getElementById("modal-description").textContent=ex.desc;document.getElementById("modal-cues").innerHTML=(ex.cues||[]).map(item=>"<li>"+esc(item)+"</li>").join("");let meta=document.getElementById("modal-meta");meta.innerHTML="";["العضلة الأساسية: "+ex.muscle,ex.equipment,ex.level].forEach(value=>{let span=document.createElement("span");span.textContent=value;meta.appendChild(span)});document.getElementById("video-frame").innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(ex.video)+'?autoplay=1&rel=0" title="'+esc(ex.name)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';modal.classList.add("open");document.body.style.overflow="hidden";document.getElementById("modal-close").focus()}
     function closeVideo(){modal.classList.remove("open");document.body.style.overflow="";document.getElementById("video-frame").innerHTML=""}
-    document.getElementById("modal-close").addEventListener("click",closeVideo);modal.addEventListener("click",e=>{if(e.target===modal)closeVideo()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeVideo();if(e.key==="Escape"&&editorOverlay.classList.contains("open"))closeEditor();if(e.key==="Escape"&&foodEditor.classList.contains("open"))closeFoodEditor()});search.addEventListener("input",render);favOnly.addEventListener("click",()=>{showFav=!showFav;favOnly.classList.toggle("active",showFav);render()});document.getElementById("manage-toolbar").hidden=true;document.getElementById("nutrition-admin").hidden=true;let canManage=new URLSearchParams(location.search).get("manage")==="1";document.getElementById("manage-entry").hidden=!canManage;document.getElementById("manage-guide").hidden=!canManage;document.getElementById("manage-toggle").classList.remove("active");document.getElementById("manage-toggle").setAttribute("aria-expanded","false");document.getElementById("stat-count").textContent=exercises.length;renderChips();render();renderFoodOptions();renderFoodAdmin();renderMealItems();
+    document.getElementById("modal-close").addEventListener("click",closeVideo);modal.addEventListener("click",e=>{if(e.target===modal)closeVideo()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeVideo();if(e.key==="Escape"&&editorOverlay.classList.contains("open"))closeEditor();if(e.key==="Escape"&&foodEditor.classList.contains("open"))closeFoodEditor()});search.addEventListener("input",render);favOnly.addEventListener("click",()=>{showFav=!showFav;favOnly.classList.toggle("active",showFav);render()});document.getElementById("manage-toolbar").hidden=true;document.getElementById("nutrition-admin").hidden=true;let canManage=window.__alarabinOwnerAuthorized===true;document.getElementById("manage-entry").hidden=!canManage;document.getElementById("manage-guide").hidden=!canManage;document.getElementById("manage-toggle").classList.remove("active");document.getElementById("manage-toggle").setAttribute("aria-expanded","false");document.getElementById("stat-count").textContent=exercises.length;renderChips();render();renderFoodOptions();renderFoodAdmin();renderMealItems();
   </script>
 
 <script>
@@ -1031,7 +1031,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   const input=document.getElementById("library-access-code");
   const status=document.getElementById("library-lock-status");
   if(!lock||!protectedContent||!form)return;
-  function ownerMode(){return new URLSearchParams(location.search).get("manage")==="1"}
+  function ownerMode(){return window.__alarabinOwnerAuthorized===true}
   const memberNameInput=document.getElementById("library-member-name");
   function memberName(){try{return sessionStorage.getItem("alarabin-member-name-v1")||""}catch(e){return ""}}
   function unlocked(){try{return ownerMode()||(localStorage.getItem(storageKey)===accessCode&&memberName().trim().split(/\s+/).filter(Boolean).length>=2)}catch(e){return ownerMode()}}
@@ -1041,6 +1041,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
     protectedContent.hidden=!allowed;
     if(stats&&location.hash==="#library")stats.hidden=!allowed;
   }
+  window.syncLibraryGate=syncGate;
   form.addEventListener("submit",function(event){
     event.preventDefault();
     const fullName=memberNameInput?memberNameInput.value.trim().replace(/\s+/g," "):"";
@@ -1103,5 +1104,29 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
     })();
   </script>
   <script src="workout-tracker.js"></script>
+  <script>
+  (async function(){
+    if(new URLSearchParams(location.search).get("manage")!=="1")return;
+    const adminHash="5a02f98d1e79b9708000f9896413f3ccb47077f472edce041eaef214dd1233dd";
+    let authorized=false;
+    try{authorized=sessionStorage.getItem("alarabin-owner-session-v1")==="ok"}catch(e){}
+    if(!authorized){
+      const supplied=window.prompt("إدارة الموقع للمدرب فقط. اكتب رمز الإدارة الخاص:");
+      if(supplied===null)return;
+      try{
+        const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(supplied));
+        const actual=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
+        authorized=actual===adminHash;
+      }catch(e){authorized=false}
+      if(!authorized){window.alert("رمز الإدارة غير صحيح. رابط المشتركين العادي يبقى متاحاً.");return}
+      try{sessionStorage.setItem("alarabin-owner-session-v1","ok")}catch(e){}
+    }
+    window.__alarabinOwnerAuthorized=true;
+    const entry=document.getElementById("manage-entry"),guide=document.getElementById("manage-guide");
+    if(entry)entry.hidden=false;
+    if(guide)guide.hidden=false;
+    if(typeof window.syncLibraryGate==="function")window.syncLibraryGate();
+  })();
+  </script>
 </body>
 </html>
