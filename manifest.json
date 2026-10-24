@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "العرابين — تمارين وتغذية مصطفى قاسم",
+  "short_name": "العرابين",
+  "description": "موقع مصطفى قاسم للتمارين والتغذية وحساب السعرات.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10120f",
+  "theme_color": "#10120f",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
