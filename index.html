@@ -113,6 +113,27 @@
 <style>
   .recipe-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}.recipe-filter{display:flex;align-items:center;gap:9px;min-height:42px;padding:8px 14px;border:1px solid #3a4235;border-radius:999px;background:#151813;color:#d5dccd;font:700 12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer;transition:background .18s,border-color .18s,color .18s}.recipe-filter span{display:grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:#252c20;color:#aab49e;font:700 10px Manrope,sans-serif}.recipe-filter[aria-pressed="true"]{border-color:#a4ce61;background:#29351e;color:#d6f5a2}.recipe-filter[aria-pressed="true"] span{background:#40532c;color:#e8ffd0}.recipe-filter:focus-visible{outline:2px solid var(--lime);outline-offset:2px}.bulk-guidance{margin:0 0 15px;padding:12px 14px;border:1px solid #455636;border-right:3px solid var(--lime);border-radius:12px;background:#1d2418;color:#c7d0bd;font-size:11px;line-height:1.9}.bulk-guidance[hidden]{display:none}
 </style>
+  <style>
+    .protein-library{margin-top:20px;padding:20px;border:1px solid #343b30;border-radius:20px;background:linear-gradient(145deg,#191d17,#141713)}
+    .protein-intro{margin:0 0 14px;padding:12px 14px;border-right:3px solid var(--lime);border-radius:10px;background:#1d2418;color:#c0c9b7;font-size:12px;line-height:1.9}
+    .protein-sources-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .protein-source-card{min-width:0;padding:13px;border:1px solid #30372b;border-radius:15px;background:#151813}
+    .protein-source-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px}
+    .protein-source-head h3{font-size:15px;line-height:1.45;margin:0}
+    .protein-cost-badge{flex:none;padding:4px 8px;border:1px solid #596c3e;border-radius:999px;color:var(--lime);font-size:9px;white-space:nowrap}
+    .protein-state{color:#a5ad9d;font-size:10px;line-height:1.6;margin:0 0 8px}
+    .protein-macros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+    .protein-macros div{min-width:0;padding:7px 3px;border:1px solid #2f362b;border-radius:9px;background:#10130f;text-align:center}
+    .protein-macros span,.protein-macros small{display:block;color:#949d8d;font-size:9px}
+    .protein-macros strong{display:block;color:var(--lime);font:700 14px Manrope,sans-serif;direction:ltr;white-space:nowrap}
+    .protein-quality{font-size:10px;color:#bbc5b0;line-height:1.65;margin:8px 0 0}
+    .protein-price{font-size:10px;color:#c6cebd;line-height:1.6;margin:6px 0 0}
+    .protein-search{width:100%;max-width:420px;min-height:42px;margin:0 0 12px;padding:9px 12px;border:1px solid #3b4435;border-radius:10px;background:#10130f;color:var(--text);font:12px "IBM Plex Sans Arabic",sans-serif}
+    .protein-search:focus{outline:2px solid #8fad52;outline-offset:1px}
+    .protein-reference{margin:13px 1px 0;color:#a5ad9d;font-size:10px;line-height:1.8}
+    .protein-reference a{color:#c9ddac;text-decoration:underline;text-underline-offset:3px}
+    @media(max-width:650px){.protein-library{padding:13px}.protein-sources-grid{grid-template-columns:1fr}.protein-source-card{padding:12px}.protein-macros strong{font-size:13px}}
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -141,6 +162,7 @@
         <a class="section-tile featured" href="#library"><span class="section-tile-icon" aria-hidden="true">🏋️</span><div><h2>مكتبة التمارين</h2><p>للمشتركين فقط · أدخل رمز الدخول</p><span class="tile-access">رمز للمشتركين</span></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
         <a class="section-tile" href="#nutrition"><span class="section-tile-icon" aria-hidden="true">🥗</span><div><h2>السعرات والماكروز</h2><p>احسب احتياجك وسجّل أكلك وكمياته</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
         <a class="section-tile" href="#recipes"><span class="section-tile-icon" aria-hidden="true">🍽️</span><div><h2>وصفات صحية وأكلات التضخيم</h2><p>وصفات عراقية بمقادير وسعرات وماكروز واضحة</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
+        <a class="section-tile" href="#protein-sources"><span class="section-tile-icon" aria-hidden="true">🥚</span><div><h2>مصادر البروتين</h2><p>٢٠ مصدر متوفر وقيم غذائية وكلفة تقريبية</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
         <a class="section-tile" href="#home-course"><span class="section-tile-icon" aria-hidden="true">🏠</span><div><h2>تمارين البيت المجانية</h2><p>حركات منزلية برسوم توضح بداية ونهاية الحركة</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
         <a class="section-tile" href="#how"><span class="section-tile-icon" aria-hidden="true">📘</span><div><h2>طريقة استخدام الموقع</h2><p>إرشادات سريعة للتمرين والتصفح</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
         <a class="section-tile" href="#trainer"><span class="section-tile-icon" aria-hidden="true">👤</span><div><h2>عن المدرب مصطفى قاسم</h2><p>التعريف والتواصل على واتساب</p></div><span class="section-tile-arrow" aria-hidden="true">←</span></a>
@@ -334,6 +356,45 @@
       <div class="recipe-grid" id="recipe-grid"></div>
       <p class="recipe-status" id="recipe-status" aria-live="polite"></p>
     </section>
+
+    <section class="shell athlete-section protein-library" id="protein-sources" aria-labelledby="protein-title">
+      <div class="recipes-head"><div><div class="kicker">اختيارات اقتصادية / من السوق العراقي</div><h2 id="protein-title">٢٠ مصدر بروتين</h2><p>مرتبة من الخيارات الأوفر غالباً إلى الأعلى كلفة، مع السعرات والماكروز لكل ١٠٠ غرام.</p></div><span class="recipe-count">٢٠ مصدر</span></div>
+      <p class="protein-intro"><strong>طريقة قراءة القيم:</strong> هذه أرقام تقريبية لكل ١٠٠ غرام من الجزء المأكول. البقول وزنها جاف قبل الطبخ؛ أما اللحوم والبيض والسمك فوزنها بعد الطبخ، والتونة والسردين بعد التصفية. الطبخ يغيّر الوزن بسبب الماء، والمنتجات الجاهزة تختلف؛ اعتمد ملصق العبوة إذا متوفر. السعر مو ثابت ويتغيّر حسب المحافظة والمحل.</p>
+      <label for="protein-search" style="display:block;margin-bottom:5px;font-size:11px;color:#c5cdbb">ابحث عن مصدر بروتين</label><input class="protein-search" id="protein-search" type="search" placeholder="مثل العدس أو التونة" autocomplete="off">
+      <div class="protein-sources-grid" id="protein-sources-grid" aria-live="polite"></div>
+      <p class="protein-intro" style="margin-top:14px"><strong>ملاحظة الأحماض الأمينية:</strong> بروتين البيض والحليب واللبن والجبن والدجاج واللحم والسمك والواي يحتوي الأحماض الأمينية الأساسية التسعة بكميات مناسبة. البقول والفول السوداني لا تخلو من الأحماض الأمينية؛ لكن بعض الأحماض تكون أقل نسبياً، وغالباً يكون الميثيونين والسيستئين أقل في البقول. نوّع البقول مع الحبوب مثل الرز أو الخبز خلال اليوم لتحسين تكامل الأحماض؛ مو شرط بنفس الوجبة.</p>
+      <p class="protein-reference">للاسترشاد بأسعار السوق: نشرة هيئة الإحصاء العراقية لآب ٢٠٢٦ تسجل متوسطات وطنية للعدس والفاصوليا والحمص والبيض والحليب المجفف والدجاج والسمك واللحوم؛ قد يختلف السعر محلياً. القيم الغذائية تقديرية من قواعد تركيب الأغذية. <a href="https://www.cosit.gov.iq/documents/indices/CPI/price2026/%D8%A7%D8%A8%202026%20%D9%86%D8%B4%D8%B1%D8%A9%20%D8%B3%D8%B9%D8%B1%D9%8A%D8%A9%20%D8%AA%D9%82%D8%B1%D9%8A%D8%B1.pdf" target="_blank" rel="noopener">نشرة أسعار العراق ↗</a> · <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central ↗</a> · <a href="https://www.fao.org/ag/humannutrition/18850-090373f7c78cda2dc6394759dfab1e7dd.pdf" target="_blank" rel="noopener">مرجع FAO عن البروتينات النباتية وتكامل الأحماض ↗</a></p>
+    </section>
+    <script>
+    (()=>{
+      const sources=[
+        {n:'عدس يابس',s:'جاف قبل السلق',k:352,p:24.6,c:63.4,f:1.1,q:'نباتي · بعض الأحماض الأساسية أقل نسبياً',t:'أوفر غالباً',price:'متوسط رسمي: ٢٬٠١٠ د.ع/كغم'},
+        {n:'فاصوليا يابسة',s:'جافة قبل الطبخ',k:333,p:23.6,c:60,f:.8,q:'نباتي · بعض الأحماض الأساسية أقل نسبياً',t:'أوفر غالباً',price:'متوسط رسمي: ٢٬٤٩٠ د.ع/٧٥٠ غ'},
+        {n:'حمص يابس',s:'جاف قبل الطبخ',k:378,p:20.5,c:63,f:6,q:'نباتي · بعض الأحماض الأساسية أقل نسبياً',t:'أوفر غالباً',price:'متوسط رسمي: ٣٬١٩٨ د.ع/٩٠٠ غ'},
+        {n:'باقلاء يابسة',s:'جافة قبل الطبخ',k:341,p:26.1,c:58.3,f:1.5,q:'نباتي · بعض الأحماض الأساسية أقل نسبياً',t:'أوفر غالباً'},
+        {n:'بازلاء مجففة',s:'جافة قبل الطبخ',k:341,p:24.6,c:60.4,f:1.2,q:'نباتي · بعض الأحماض الأساسية أقل نسبياً',t:'أوفر غالباً'},
+        {n:'بيض كامل مسلوق',s:'وزن الجزء المأكول بدون القشر',k:155,p:12.6,c:1.1,f:10.6,q:'بروتين كامل',t:'أوفر غالباً',price:'متوسط رسمي للبيض الأبيض: ٦٬٣٤٧ د.ع/طبق ٣٠'},
+        {n:'صدر دجاج',s:'مطبوخ، بدون جلد',k:165,p:31,c:0,f:3.6,q:'بروتين كامل',t:'اقتصادي غالباً'},
+        {n:'فخذ دجاج',s:'لحم مطبوخ بدون جلد أو عظم',k:179,p:24.8,c:0,f:8.2,q:'بروتين كامل',t:'اقتصادي غالباً'},
+        {n:'كبدة دجاج',s:'مطبوخة',k:167,p:24.5,c:.9,f:6.5,q:'بروتين كامل',t:'اقتصادي غالباً'},
+        {n:'حليب مجفف كامل الدسم',s:'مسحوق قبل التحضير',k:496,p:26.3,c:38.4,f:26.7,q:'بروتين كامل',t:'متوسط',price:'متوسط رسمي: ٤٬١٧٠ د.ع/٤٠٠ غ'},
+        {n:'حليب بقري كامل الدسم',s:'سائل',k:61,p:3.2,c:4.8,f:3.3,q:'بروتين كامل',t:'متوسط'},
+        {n:'لبن / زبادي سادة',s:'كامل الدسم، بدون سكر مضاف',k:61,p:3.5,c:4.7,f:3.3,q:'بروتين كامل',t:'متوسط'},
+        {n:'جبن أبيض',s:'قيمة تقريبية؛ يختلف حسب النوع والملوحة',k:264,p:14.2,c:4.1,f:21.3,q:'بروتين كامل',t:'متوسط'},
+        {n:'سمك كارب',s:'لحم مطبوخ، بدون عظم',k:127,p:17.8,c:0,f:5.6,q:'بروتين كامل',t:'متوسط'},
+        {n:'تونة معلبة بالماء',s:'مصفّاة من السائل',k:116,p:25.5,c:0,f:.8,q:'بروتين كامل',t:'متوسط'},
+        {n:'سردين معلب',s:'مصفّى؛ قد تختلف الدهون حسب الزيت',k:208,p:24.6,c:0,f:11.5,q:'بروتين كامل',t:'متوسط'},
+        {n:'فول سوداني',s:'حب نيّ غير مملح',k:567,p:25.8,c:16.1,f:49.2,q:'نباتي · لا تعتمد عليه وحده كمصدر بروتين؛ دهونه وسعراته عالية',t:'متوسط'},
+        {n:'واي بروتين',s:'مسحوق مركز؛ راجع ملصق منتجك',k:380,p:78,c:8,f:4,q:'بروتين كامل؛ تختلف القيم بين المنتجات',t:'أعلى غالباً'},
+        {n:'لحم بقري قليل الدهن',s:'مطبوخ؛ القيمة تتغير حسب القطعة والدهن',k:217,p:26,c:0,f:11.8,q:'بروتين كامل',t:'أعلى غالباً',price:'متوسط رسمي للطازج بدون عظم: ١٨٬١٥٣ د.ع/كغم'},
+        {n:'لحم غنم قليل الدهن',s:'مطبوخ؛ القيمة تتغير حسب القطعة والدهن',k:258,p:25.6,c:0,f:16.5,q:'بروتين كامل',t:'أعلى غالباً',price:'متوسط رسمي للطازج: ٢١٬٦٥٥ د.ع/كغم'}
+      ];
+      const grid=document.getElementById('protein-sources-grid'),search=document.getElementById('protein-search');
+      const fmt=v=>Number.isInteger(v)?String(v):String(v).replace('.', '٫');
+      const render=()=>{const query=search.value.trim().toLowerCase();const visible=sources.filter(x=>(x.n+' '+x.s+' '+x.t).toLowerCase().includes(query));grid.innerHTML=visible.map((x,i)=>`<article class="protein-source-card"><div class="protein-source-head"><h3>${String(i+1).padStart(2,'0')} · ${x.n}</h3><span class="protein-cost-badge">${x.t}</span></div><p class="protein-state">${x.s} · القيم لكل ١٠٠ غ</p><div class="protein-macros"><div><span>السعرات</span><strong>${fmt(x.k)}</strong><small>kcal</small></div><div><span>بروتين</span><strong>${fmt(x.p)}</strong><small>غ</small></div><div><span>كارب</span><strong>${fmt(x.c)}</strong><small>غ</small></div><div><span>دهون</span><strong>${fmt(x.f)}</strong><small>غ</small></div></div><p class="protein-quality">${x.q}</p>${x.price?`<p class="protein-price">${x.price}</p>`:''}</article>`).join('')||'<p class="protein-reference">ما لكيت مصدر بهذا الاسم.</p>';};
+      search.addEventListener('input',render);render();
+    })();
+    </script>
 
 
 
@@ -926,7 +987,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   const supplement=document.querySelector('.supplement-promo');
   if(!home)return;
   if(supplement)supplement.id='supplements';
-  const views={library:[document.getElementById('library'),document.querySelector('.stats')],football:[document.getElementById('football')],results:[document.getElementById('results')],nutrition:[document.getElementById('nutrition')],recipes:[document.getElementById('recipes')],subscription:[document.getElementById('subscription')],'disc-care':[document.getElementById('disc-care')],'home-course':[document.getElementById('home-course')],how:[document.getElementById('how')],trainer:[document.getElementById('trainer')],supplements:[supplement],coach:[document.getElementById('coach')]};
+  const views={library:[document.getElementById('library'),document.querySelector('.stats')],football:[document.getElementById('football')],results:[document.getElementById('results')],nutrition:[document.getElementById('nutrition')],recipes:[document.getElementById('recipes')],'protein-sources':[document.getElementById('protein-sources')],subscription:[document.getElementById('subscription')],'disc-care':[document.getElementById('disc-care')],'home-course':[document.getElementById('home-course')],how:[document.getElementById('how')],trainer:[document.getElementById('trainer')],supplements:[supplement],coach:[document.getElementById('coach')]};
   const nodes=[...new Set(Object.values(views).flat().filter(Boolean))];
   const back=document.createElement('div');back.className='category-return';back.innerHTML='<a href="#home">→ رجوع إلى خانات الموقع</a>';back.hidden=true;document.querySelector('header.topbar').insertAdjacentElement('afterend',back);
   function show(){const raw=(location.hash||'').slice(1)||'home';const key=raw==='top'?'home':raw==='recipes-title'?'recipes':raw;if(key!=='home'&&!views[key])return;home.hidden=key!=='home';back.hidden=key==='home';nodes.forEach(node=>node.hidden=true);(views[key]||[]).filter(Boolean).forEach(node=>node.hidden=false);if(key!=='home')window.scrollTo({top:0,behavior:'smooth'});}
