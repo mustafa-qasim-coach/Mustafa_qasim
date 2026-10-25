@@ -1135,7 +1135,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   if(!lock||!protectedContent||!form)return;
   function ownerMode(){return window.__alarabinOwnerAuthorized===true}
   const memberNameInput=document.getElementById("library-member-name");
-  function memberName(){try{return sessionStorage.getItem("alarabin-member-name-v1")||""}catch(e){return ""}}
+  function memberName(){try{const saved=localStorage.getItem("alarabin-member-name-v1");if(saved)return saved;const legacy=sessionStorage.getItem("alarabin-member-name-v1")||"";if(legacy)localStorage.setItem("alarabin-member-name-v1",legacy);return legacy}catch(e){try{return sessionStorage.getItem("alarabin-member-name-v1")||""}catch(ignore){return ""}}}
   function unlocked(){try{return ownerMode()||(localStorage.getItem(storageKey)===accessCode&&memberName().trim().split(/\s+/).filter(Boolean).length>=2)}catch(e){return ownerMode()}}
   function syncGate(){
     const allowed=unlocked();
@@ -1159,14 +1159,16 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
       return;
     }
     try{localStorage.setItem(storageKey,accessCode)}catch(e){}
-    try{sessionStorage.setItem("alarabin-member-name-v1",fullName)}catch(e){}    let sendNameNotice=false;
+    try{localStorage.setItem("alarabin-member-name-v1",fullName)}catch(e){}
+    try{sessionStorage.setItem("alarabin-member-name-v1",fullName)}catch(e){}
+    let sendNameNotice=false;
     const noticeKey="alarabin-name-notice-v1:"+fullName.toLocaleLowerCase("ar");
     try{sendNameNotice=localStorage.getItem(noticeKey)!=="opened";if(sendNameNotice)localStorage.setItem(noticeKey,"opened")}catch(e){sendNameNotice=true}
     if(sendNameNotice){
       const nameMessage="مشترك جديد سجل بمكتبة تمارين العرابين. الاسم الثنائي: "+fullName;
       window.open("https://wa.me/9647711120604?text="+encodeURIComponent(nameMessage),"_blank","noopener,noreferrer");
     }
-    status.textContent="";
+    status.textContent="تم حفظ دخولك واسمك على هذا الجهاز؛ بالمرة الجاية تفتح المكتبة مباشرة.";
     syncGate();
   });
   window.addEventListener("hashchange",syncGate);
