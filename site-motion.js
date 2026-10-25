@@ -55,7 +55,7 @@
     }
   }
 
-  if (!gsapReady) return;
+  if (reducedMotion) return;
 
   const revealSelector = [
     '.section-home-head', '.section-tile', '.section-head', '.hero-art', '.stat',
@@ -71,18 +71,37 @@
         return entry.target;
       });
     if (!entering.length) return;
-    gsap.fromTo(entering,
-      { autoAlpha: 0, y: 15 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.48,
-        ease: 'power2.out',
-        stagger: 0.055,
-        clearProps: 'opacity,visibility,transform',
-        overwrite: 'auto',
-      }
-    );
+    if (gsapReady) {
+      gsap.fromTo(entering,
+        { autoAlpha: 0, y: 15 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.48,
+          ease: 'power2.out',
+          stagger: 0.055,
+          clearProps: 'opacity,visibility,transform',
+          overwrite: 'auto',
+        }
+      );
+      return;
+    }
+
+    entering.forEach((element, index) => {
+      const animation = element.animate(
+        [
+          { opacity: 0, transform: 'translateY(15px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+        {
+          duration: 480,
+          delay: index * 55,
+          easing: 'cubic-bezier(.22, 1, .36, 1)',
+          fill: 'both',
+        }
+      );
+      animation.onfinish = () => animation.cancel();
+    });
   }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
 
   function watchReveal(root) {
@@ -112,7 +131,7 @@
   });
 
   const logoOrb = document.querySelector('.hero-art .orb');
-  if (logoOrb) {
+  if (logoOrb && gsapReady) {
     gsap.to(logoOrb, {
       y: -7,
       rotation: 1,
