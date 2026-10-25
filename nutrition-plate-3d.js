@@ -41,16 +41,77 @@ import * as THREE from 'three';
   const foodRoot = new THREE.Group();
   plateRig.add(foodRoot);
 
+  function createFoodTexture({ base, shade, light, fleck, seed = 19, fibers = false }) {
+    const surface = document.createElement('canvas');
+    surface.width = 256;
+    surface.height = 256;
+    const context = surface.getContext('2d');
+    if (!context) return null;
+    let value = seed;
+    const random = () => { value = (value * 16807) % 2147483647; return (value - 1) / 2147483646; };
+    const gradient = context.createRadialGradient(74, 66, 8, 134, 136, 190);
+    gradient.addColorStop(0, light);
+    gradient.addColorStop(0.55, base);
+    gradient.addColorStop(1, shade);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 300; i += 1) {
+      const x = random() * 256;
+      const y = random() * 256;
+      const radius = 1 + random() * (fibers ? 4.5 : 7);
+      context.globalAlpha = 0.08 + random() * 0.2;
+      context.fillStyle = random() > 0.53 ? light : shade;
+      context.beginPath();
+      context.ellipse(x, y, radius * (fibers ? 1.8 : 1), radius * (fibers ? 0.55 : 1), random() * Math.PI, 0, Math.PI * 2);
+      context.fill();
+    }
+    context.globalAlpha = 1;
+    if (fibers) {
+      for (let i = 0; i < 58; i += 1) {
+        const x = random() * 256;
+        const y = random() * 256;
+        context.strokeStyle = random() > 0.55 ? light : shade;
+        context.globalAlpha = 0.15 + random() * 0.18;
+        context.lineWidth = 0.7 + random() * 1.1;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.quadraticCurveTo(x + (random() - 0.5) * 28, y + 12, x + (random() - 0.5) * 42, y + 30 + random() * 24);
+        context.stroke();
+      }
+    }
+    for (let i = 0; i < 170; i += 1) {
+      const x = random() * 256;
+      const y = random() * 256;
+      context.globalAlpha = 0.25 + random() * 0.45;
+      context.fillStyle = fleck;
+      context.beginPath();
+      context.ellipse(x, y, 0.7 + random() * 1.7, 0.7 + random() * 1.2, random() * Math.PI, 0, Math.PI * 2);
+      context.fill();
+    }
+    context.globalAlpha = 1;
+    const texture = new THREE.CanvasTexture(surface);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  const chickenTexture = createFoodTexture({ base: '#be7747', shade: '#70452f', light: '#e2aa70', fleck: '#503625', seed: 71, fibers: true });
+  const fishTexture = createFoodTexture({ base: '#e48461', shade: '#c45e4b', light: '#ffc398', fleck: '#f5d9b9', seed: 83, fibers: true });
+  const meatTexture = createFoodTexture({ base: '#854832', shade: '#482c25', light: '#b36c49', fleck: '#3b271f', seed: 97, fibers: true });
+  const potatoTexture = createFoodTexture({ base: '#d2a25d', shade: '#8b6538', light: '#f3d18a', fleck: '#765734', seed: 113 });
   const material = (color, roughness = 0.48, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
   const materials = {
     porcelain: new THREE.MeshPhysicalMaterial({ color: '#e9eedf', roughness: 0.2, metalness: 0.1, clearcoat: 0.92, clearcoatRoughness: 0.13, side: THREE.DoubleSide }),
     inner: new THREE.MeshPhysicalMaterial({ color: '#d8dfc6', roughness: 0.28, metalness: 0.04, clearcoat: 0.72, side: THREE.DoubleSide }),
     brass: new THREE.MeshStandardMaterial({ color: '#b9a361', roughness: 0.25, metalness: 0.78 }),
     rice: material('#fff3d4', 0.82), riceShade: material('#ead8b1', 0.85),
-    chicken: material('#a75c36', 0.62), chickenLight: material('#c88345', 0.58), grill: material('#593321', 0.75),
-    salmon: material('#dc7655', 0.48), salmonLight: material('#f2b181', 0.54), meat: material('#79412f', 0.58),
+    chicken: chickenTexture ? new THREE.MeshPhysicalMaterial({ color: '#fff9f0', map: chickenTexture, roughness: 0.46, clearcoat: 0.28, clearcoatRoughness: 0.34 }) : material('#bd7447', 0.56),
+    chickenLight: material('#d79459', 0.5), crust: material('#78462f', 0.58), grill: material('#503326', 0.75),
+    salmon: fishTexture ? new THREE.MeshPhysicalMaterial({ color: '#fff9f0', map: fishTexture, roughness: 0.42, clearcoat: 0.22 }) : material('#dc7655', 0.48),
+    salmonLight: material('#f7c89d', 0.48), meat: meatTexture ? new THREE.MeshPhysicalMaterial({ color: '#fff9f0', map: meatTexture, roughness: 0.49, clearcoat: 0.24 }) : material('#79412f', 0.58),
     egg: material('#fff8e5', 0.35), yolk: material('#f4b330', 0.4),
-    potato: material('#d9a74f', 0.72), potatoSkin: material('#916b3d', 0.78),
+    potato: potatoTexture ? new THREE.MeshPhysicalMaterial({ color: '#fffaf0', map: potatoTexture, roughness: 0.58, clearcoat: 0.12 }) : material('#d9a74f', 0.72), potatoSkin: material('#916b3d', 0.78),
     pasta: material('#e8bd61', 0.52), sauce: material('#bf4631', 0.56),
     oats: material('#dcc899', 0.9), bread: material('#b47a45', 0.76), breadInner: material('#f3d69c', 0.74),
     greens: material('#5f984b', 0.68), greensLight: material('#9ebf57', 0.66), greensDark: material('#3b713e', 0.7),
@@ -66,6 +127,7 @@ import * as THREE from 'three';
   const dummy = new THREE.Object3D();
   let currentItems = [];
   let currentCategory = 'protein';
+  let previousVisualSignature = '';
   let userRotationUntil = 0;
   let pointer = null;
   let lastFrame = performance.now();
@@ -154,18 +216,55 @@ import * as THREE from 'three';
   }
 
   function makeChicken(parent) {
-    const pieces = [[-0.17, 0.23, -0.08, -0.12], [0.21, 0.22, -0.02, 0.24], [0.02, 0.24, 0.17, -0.32]];
-    pieces.forEach(([x, y, z, angle], index) => {
-      ellipsoid(parent, index === 1 ? materials.chickenLight : materials.chicken, [x, y, z], [0.35, 0.13, 0.24], [0.12, angle, 0.02]);
+    const cutletShape = new THREE.Shape();
+    cutletShape.moveTo(-0.34, -0.1);
+    cutletShape.bezierCurveTo(-0.39, -0.02, -0.3, 0.11, -0.17, 0.13);
+    cutletShape.bezierCurveTo(-0.02, 0.21, 0.17, 0.17, 0.31, 0.08);
+    cutletShape.bezierCurveTo(0.41, 0.01, 0.35, -0.11, 0.26, -0.15);
+    cutletShape.bezierCurveTo(0.12, -0.23, -0.03, -0.17, -0.15, -0.16);
+    cutletShape.bezierCurveTo(-0.24, -0.19, -0.31, -0.18, -0.34, -0.1);
+    const cutletGeometry = new THREE.ExtrudeGeometry(cutletShape, {
+      depth: 0.09,
+      bevelEnabled: true,
+      bevelSegments: 3,
+      bevelSize: 0.025,
+      bevelThickness: 0.025,
+      curveSegments: 16,
+      steps: 1,
+    });
+    cutletGeometry.computeVertexNormals();
+    const pieces = [
+      { x: -0.21, z: -0.09, angle: -0.26, sx: 0.82, sz: 0.8 },
+      { x: 0.17, z: -0.005, angle: 0.19, sx: 0.9, sz: 0.83 },
+      { x: -0.005, z: 0.19, angle: -0.12, sx: 0.69, sz: 0.72 },
+    ];
+    pieces.forEach(({ x, z, angle, sx, sz }, index) => {
+      const cutlet = addMesh(parent, cutletGeometry, materials.chicken, [x, 0.19 + index * 0.008, z], [sx, sz, 1], [-Math.PI / 2, angle, 0]);
+      cutlet.castShadow = false;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const rotatePoint = (lx, lz, y) => [x + cos * lx + sin * lz, y, z - sin * lx + cos * lz];
       for (let line = -1; line <= 1; line += 1) {
-        const offset = line * 0.078;
-        tube(parent, [[x - 0.16, y + 0.095, z + offset - 0.035], [x - 0.02, y + 0.12, z + offset], [x + 0.13, y + 0.095, z + offset + 0.035]], 0.009, materials.grill, 10);
+        const localZ = line * 0.055 * sz;
+        const start = rotatePoint(-0.2 * sx, localZ - 0.018, 0.305 + index * 0.008);
+        const middle = rotatePoint(-0.015 * sx, localZ, 0.316 + index * 0.008);
+        const end = rotatePoint(0.19 * sx, localZ + 0.018, 0.305 + index * 0.008);
+        tube(parent, [start, middle, end], 0.007, index === 1 && line === 0 ? materials.chickenLight : materials.grill, 12);
       }
     });
+    let seed = 29;
+    const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    for (let i = 0; i < 18; i += 1) {
+      const x = (random() - 0.5) * 0.72;
+      const z = (random() - 0.5) * 0.34;
+      const spice = ellipsoid(parent, i % 3 ? materials.greensDark : materials.potatoSkin, [x, 0.315 + random() * 0.014, z], [0.012 + random() * 0.009, 0.004, 0.008 + random() * 0.006]);
+      spice.rotation.y = random() * Math.PI;
+    }
   }
 
   function makeFish(parent) {
-    ellipsoid(parent, materials.salmon, [0, 0.22, 0], [0.57, 0.13, 0.29], [0.05, -0.15, 0]);
+    ellipsoid(parent, materials.meat, [0, 0.195, 0], [0.57, 0.105, 0.29], [0.05, -0.15, 0]);
+    ellipsoid(parent, materials.salmon, [0, 0.235, 0], [0.55, 0.11, 0.28], [0.05, -0.15, 0]);
     ellipsoid(parent, materials.salmonLight, [0, 0.306, 0], [0.45, 0.022, 0.205], [0, -0.15, 0]);
     for (let i = -2; i <= 2; i += 1) {
       const x = i * 0.14;
@@ -247,7 +346,8 @@ import * as THREE from 'three';
 
   function makeMeat(parent) {
     [[-0.2, 0.21, -0.06], [0.19, 0.2, 0.03], [0.0, 0.23, 0.18]].forEach(([x, y, z], i) => {
-      ellipsoid(parent, i === 1 ? materials.chicken : materials.meat, [x, y, z], [0.26, 0.13, 0.18], [0.08, i * 0.55, 0.12]);
+      ellipsoid(parent, materials.crust, [x, y - 0.01, z], [0.27, 0.13, 0.19], [0.08, i * 0.55, 0.12]);
+      ellipsoid(parent, materials.meat, [x, y + 0.014, z], [0.255, 0.12, 0.175], [0.08, i * 0.55, 0.12]);
       tube(parent, [[x - 0.1, y + 0.1, z - 0.08], [x, y + 0.12, z], [x + 0.1, y + 0.1, z + 0.08]], 0.01, materials.grill, 10);
     });
   }
@@ -307,7 +407,7 @@ import * as THREE from 'three';
     }
   }
 
-  function makePortion(food, index, count) {
+  function makePortion(food, index, count, animateIn = false) {
     const group = new THREE.Group();
     group.userData.foodId = food.id;
     const kind = detectKind(food);
@@ -340,10 +440,13 @@ import * as THREE from 'three';
     if (food.current) {
       addMesh(group, new THREE.RingGeometry(0.38, 0.405, 52), materials.selectedRing, [0, 0.135, 0], [1, 1, 1], [-Math.PI / 2, 0, 0]);
     }
-    group.position.set(layout[index][0], 0.12, layout[index][1]);
+    const baseY = 0.12;
+    group.position.set(layout[index][0], baseY + (animateIn && !reducedMotion ? 0.15 : 0), layout[index][1]);
     const portionScale = count >= 5 ? 0.66 : count === 4 ? 0.76 : count === 3 ? 0.86 : count === 2 ? 0.93 : 1;
     const amountScale = THREE.MathUtils.clamp(Math.sqrt(Math.max(1, Number(food.grams) || 100) / 100), 0.84, 1.2);
-    group.scale.setScalar(portionScale * amountScale);
+    const targetScale = portionScale * amountScale;
+    group.scale.setScalar(animateIn && !reducedMotion ? targetScale * 0.56 : targetScale);
+    group.userData.enterMotion = animateIn && !reducedMotion ? { start: performance.now(), baseY, targetScale } : null;
     group.rotation.y = (index * 0.48) + (kind === 'bread' ? -0.2 : 0);
     foodRoot.add(group);
     return group;
@@ -368,7 +471,7 @@ import * as THREE from 'three';
     foodRoot.clear();
   }
 
-  function refreshFood(items) {
+  function refreshFood(items, animateIn = false) {
     currentItems = items;
     releaseFoodMeshes();
     if (!items.length) {
@@ -376,7 +479,7 @@ import * as THREE from 'three';
       return;
     }
     const visible = items.slice(-6);
-    visible.forEach((food, index) => makePortion(food, index, visible.length));
+    visible.forEach((food, index) => makePortion(food, index, visible.length, animateIn));
   }
 
   function updatePlate(selected, items) {
@@ -399,7 +502,10 @@ import * as THREE from 'three';
       ...visibleMeal.filter(item => item.current),
       ...visibleMeal.filter(item => !item.current).slice(-3),
     ].slice(0, 4).map((item, index) => ({ ...item, id: item.id ?? `plate-item-${index}` }));
-    refreshFood(normalized);
+    const signature = normalized.map(item => `${item.id}:${item.current ? 'selected' : 'meal'}`).join('|');
+    const animateIn = signature !== previousVisualSignature;
+    refreshFood(normalized, animateIn);
+    previousVisualSignature = signature;
     canvas.setAttribute('aria-label', normalized.length
       ? `معاينة ثلاثية الأبعاد للوجبة: ${normalized.map(item => item.name).join('، ')}`
       : 'طبق طعام ثلاثي الأبعاد تفاعلي. اختار أكلة حتى تظهر بالصحن.');
@@ -418,6 +524,15 @@ import * as THREE from 'three';
     if (document.hidden) return;
     const delta = Math.min((now - lastFrame) / 1000, 0.05);
     lastFrame = now;
+    foodRoot.children.forEach(group => {
+      const motion = group.userData.enterMotion;
+      if (!motion) return;
+      const progress = THREE.MathUtils.clamp((now - motion.start) / 520, 0, 1);
+      const eased = 1 - ((1 - progress) ** 3);
+      group.scale.setScalar(motion.targetScale * (0.56 + 0.44 * eased));
+      group.position.y = motion.baseY + 0.15 * (1 - eased);
+      if (progress >= 1) group.userData.enterMotion = null;
+    });
     if (!reducedMotion && now > userRotationUntil) plateRig.rotation.y += delta * 0.075;
     renderer.render(scene, camera);
   }
