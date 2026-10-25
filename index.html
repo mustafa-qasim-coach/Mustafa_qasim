@@ -154,10 +154,14 @@
 .food-validation-preview.valid{border-color:#66833f;background:#1e2818;color:#d5f3a2}
 .food-validation-preview.invalid{border-color:#8a5148;background:#2a1d1a;color:#ffc0b3}
 #meal-action-status a{color:var(--lime);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:650px){#meal-entry-form{grid-template-columns:minmax(0,1fr) minmax(0,.62fr)}#meal-entry-form .field{min-width:0}#meal-entry-form .manage-action,#meal-entry-form .food-preview{grid-column:1/-1;width:100%;max-width:100%;min-width:0;box-sizing:border-box}#meal-entry-form #food-search-count{overflow-wrap:anywhere}}
 </style>
-  <link rel="stylesheet" href="./site-motion.css?v=nutrition-plate-v3">
+  <link rel="stylesheet" href="./site-motion.css?v=nutrition-plate-3d-v1">
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" crossorigin="anonymous"></script>
   <script defer src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" crossorigin="anonymous"></script>
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js"}}
+  </script>
 </head>
 <body>
   <header class="topbar">
@@ -346,8 +350,9 @@
           </div>
           <div class="macro-scene" data-active="protein" aria-label="صحن تفاعلي يعرض الطعام الذي تختاره ومكونات وجبتك">
             <div class="plate-scene-glow" aria-hidden="true"></div>
-            <div class="plate-scene-head"><span>معاينة وجبتك</span><span id="plate-food-count">0 أصناف</span></div>
+            <div class="plate-scene-head"><span>طبق 3D · اسحب للتدوير</span><span id="plate-food-count">0 أصناف</span></div>
             <div class="plate-stage">
+              <canvas class="nutrition-plate-canvas" id="nutrition-plate-canvas" tabindex="0" aria-label="طبق طعام ثلاثي الأبعاد تفاعلي، اسحب لتدويره أو استخدم الأسهم"></canvas>
               <div class="macro-plate" aria-hidden="true"><div class="plate-rim"><div class="plate-well"><div class="plate-well-shine"></div><div class="plate-food-layer" id="plate-food-layer" aria-live="polite"><div class="plate-empty-state"><span>🍽️</span><b>الصحن جاهز</b><small>اختار أكلة من القائمة</small></div></div></div></div></div>
               <div class="plate-current-card" aria-live="polite"><span class="plate-current-icon" id="plate-current-icon">🍽️</span><span class="plate-current-copy"><small>اختيارك الحالي</small><strong id="plate-current-name">اختار طعاماً من القائمة</strong><small id="plate-current-amount">تظهر الكمية هنا</small></span></div>
             </div>
@@ -1233,6 +1238,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
     loginCode.focus();
   })();
   </script>
-  <script defer src="./site-motion.js?v=nutrition-plate-v3"></script>
+  <script defer src="./site-motion.js?v=nutrition-plate-3d-v1"></script>
+  <script type="module" src="./nutrition-plate-3d.js?v=nutrition-plate-3d-v1"></script>
 </body>
 </html>

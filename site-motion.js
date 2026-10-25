@@ -75,6 +75,7 @@
       macroScene.dataset.active = choice;
       if (macroFocusCopy) macroFocusCopy.textContent = macroCopy[choice];
       macroScene.setAttribute('aria-label', `تصميم ثلاثي الأبعاد لمصادر ${button.textContent.trim()}`);
+      window.updateAlarabin3DCategory?.(choice);
     });
   });
 
@@ -175,10 +176,13 @@
     if (plateAmount) plateAmount.textContent = selected ? `${selected.grams} ${selected.unit} · معاينة قبل الإضافة` : 'تظهر الكمية هنا';
     if (plateIcon) plateIcon.textContent = iconForPlate(selected);
     if (plateCount) plateCount.textContent = `${meal.length} ${meal.length === 1 ? 'صنف بالوجبة' : 'أصناف بالوجبة'}`;
+    window.__alarabinPlateData = { selected, items: meal };
+    window.updateAlarabin3DPlate?.(selected, meal);
     if (selected && macroScene) {
       const category = categoryForPlate(selected);
       if (['protein', 'carbs', 'fats'].includes(category)) {
         macroScene.dataset.active = category;
+        window.updateAlarabin3DCategory?.(category);
         document.querySelectorAll('[data-macro-choice]').forEach((button) => {
           button.setAttribute('aria-pressed', String(button.dataset.macroChoice === category));
         });

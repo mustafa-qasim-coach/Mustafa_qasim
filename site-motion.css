@@ -93,6 +93,11 @@ html.lenis body {
 .plate-scene-head > span:first-child::before { width: 7px; height: 7px; border-radius: 50%; background: #c5f36b; box-shadow: 0 0 12px #c5f36b; content: ""; }
 #plate-food-count { padding: 5px 9px; border: 1px solid #ffffff14; border-radius: 99px; background: #ffffff08; color: #aab99a; font-size: 10px; }
 .plate-stage { position: relative; display: grid; min-height: 292px; place-items: center; padding: 4px 0 34px; perspective: 900px; }
+.nutrition-plate-canvas { position: absolute; z-index: 2; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; pointer-events: none; touch-action: none; transition: opacity .65s ease; }
+.macro-scene.three-ready .nutrition-plate-canvas { opacity: 1; pointer-events: auto; cursor: grab; }
+.macro-scene.three-ready .nutrition-plate-canvas.is-dragging { cursor: grabbing; }
+.macro-scene.three-ready .nutrition-plate-canvas:focus-visible { outline: 2px solid #c5f36b; outline-offset: -5px; border-radius: 18px; }
+.macro-scene.three-ready .macro-plate { opacity: 0; visibility: hidden; }
 .plate-stage::after { position: absolute; right: 13%; bottom: 30px; left: 13%; height: 24px; border-radius: 50%; background: #000b; content: ""; filter: blur(13px); }
 .macro-plate {
   position: relative;
@@ -128,7 +133,7 @@ html.lenis body {
 .plate-food-token[data-category="fats"] { --food-accent: #a9cf75; --food-glow: #78a34c48; }
 .plate-food-token[data-current="true"] { border-color: #e5f5bd96; box-shadow: inset 0 1px #ffffff28, 0 0 20px #b9e96744, 0 7px 16px #0008; }
 .plate-token-overflow { display: grid; min-width: 45px; height: 39px; place-items: center; border: 1px solid #ffffff21; border-radius: 11px; background: #10150fbb; color: #dbe6ce; font-size: 11px; }
-.plate-current-card { position: absolute; z-index: 3; right: 50%; bottom: 0; display: flex; width: min(90%, 315px); min-height: 59px; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #ffffff21; border-radius: 14px; background: linear-gradient(135deg, #293222ed, #171d14f5); box-shadow: 0 9px 20px #0008, inset 0 1px #ffffff14; text-align: right; transform: translateX(50%); backdrop-filter: blur(12px); }
+.plate-current-card { position: absolute; z-index: 3; top: 8px; right: 9px; display: flex; width: min(76%, 285px); min-height: 50px; align-items: center; gap: 8px; padding: 6px 9px; border: 1px solid #ffffff21; border-radius: 14px; background: linear-gradient(135deg, #293222ed, #171d14f5); box-shadow: 0 9px 20px #0008, inset 0 1px #ffffff14; text-align: right; backdrop-filter: blur(12px); }
 .plate-current-icon { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 11px; background: #c5f36b19; color: #dcf6aa; font-size: 17px; }
 .plate-current-copy { display: grid; min-width: 0; gap: 2px; }
 .plate-current-copy small { color: #a4b095; font-size: 9px; }
@@ -229,12 +234,13 @@ html.motion-enabled .hero-actions a:active {
   .plate-food-token-icon { width: 26px; height: 34px; font-size: 17px; }
   .plate-food-token strong { font-size: 9px; }
   .plate-food-token small { font-size: 8px; }
-  .plate-current-card { width: min(94%, 310px); }
+  .plate-current-card { top: 7px; right: 7px; width: min(76%, 260px); }
   .plate-meal-chip, .plate-empty-chip { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   #alarabin-scroll-progress { box-shadow: none; }
   .macro-plate, .plate-scene-glow, .plate-food-token { animation: none !important; }
+  .nutrition-plate-canvas { transition: none !important; }
   .macro-plate, .macro-choice { transition: none !important; }
 }
