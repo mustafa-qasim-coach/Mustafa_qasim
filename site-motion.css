@@ -1,0 +1,41 @@
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+#alarabin-scroll-progress {
+  position: fixed;
+  z-index: 1500;
+  inset: 0 0 auto;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, #9bc841, #d8ff8a);
+  box-shadow: 0 0 12px #c5f36b70;
+  transform: scaleX(0);
+  transform-origin: right center;
+}
+
+.topbar.motion-scrolled {
+  box-shadow: 0 12px 30px #0005;
+  backdrop-filter: blur(14px);
+}
+
+@media (max-width: 650px) {
+  #alarabin-scroll-progress { height: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #alarabin-scroll-progress { box-shadow: none; }
+}

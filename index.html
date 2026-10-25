@@ -154,7 +154,11 @@
 .food-validation-preview.valid{border-color:#66833f;background:#1e2818;color:#d5f3a2}
 .food-validation-preview.invalid{border-color:#8a5148;background:#2a1d1a;color:#ffc0b3}
 #meal-action-status a{color:var(--lime);text-decoration:underline;text-underline-offset:3px}
-</style></head>
+</style>
+  <link rel="stylesheet" href="./site-motion.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" crossorigin="anonymous"></script>
+</head>
 <body>
   <header class="topbar">
     <div class="shell nav">
@@ -1085,7 +1089,7 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
   const views={library:[document.getElementById('library'),document.querySelector('.stats')],football:[document.getElementById('football')],results:[document.getElementById('results')],nutrition:[document.getElementById('nutrition')],recipes:[document.getElementById('recipes')],subscription:[document.getElementById('subscription')],'injury-help':[document.getElementById('injury-help')],'home-course':[document.getElementById('home-course')],how:[document.getElementById('how')],trainer:[document.getElementById('trainer')],supplements:[supplement],coach:[document.getElementById('coach')]};
   const nodes=[...new Set(Object.values(views).flat().filter(Boolean))];
   const back=document.createElement('div');back.className='category-return';back.innerHTML='<a href="#home">→ رجوع إلى خانات الموقع</a>';back.hidden=true;document.querySelector('header.topbar').insertAdjacentElement('afterend',back);
-  function show(){const raw=(location.hash||'').slice(1)||'home';const key=raw==='top'?'home':raw==='recipes-title'?'recipes':raw;if(key!=='home'&&!views[key])return;home.hidden=key!=='home';back.hidden=key==='home';nodes.forEach(node=>node.hidden=true);(views[key]||[]).filter(Boolean).forEach(node=>node.hidden=false);if(key!=='home')window.scrollTo({top:0,behavior:'smooth'});}
+   function show(){const raw=(location.hash||'').slice(1)||'home';const key=raw==='top'?'home':raw==='recipes-title'?'recipes':raw;if(key!=='home'&&!views[key])return;home.hidden=key!=='home';back.hidden=key==='home';nodes.forEach(node=>node.hidden=true);(views[key]||[]).filter(Boolean).forEach(node=>node.hidden=false);if(key!=='home'){if(window.__alarabinLenis)window.__alarabinLenis.scrollTo(0,{duration:.72});else window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}}
   window.addEventListener('hashchange',show);show();
 })();
 </script>
@@ -1205,5 +1209,6 @@ document.getElementById('manage-toggle').addEventListener('click',()=>setTimeout
     loginCode.focus();
   })();
   </script>
+  <script defer src="./site-motion.js"></script>
 </body>
 </html>
