@@ -1,31 +1,9 @@
 (function () {
   const systemPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let savedMotionPreference = null;
-  try {
-    savedMotionPreference = window.localStorage.getItem('alarabin-motion-preference');
-  } catch (_) {}
-  const motionEnabled = savedMotionPreference === 'on'
-    || (savedMotionPreference !== 'off' && !systemPrefersReducedMotion);
+  const motionEnabled = !systemPrefersReducedMotion;
   const gsapReady = !!window.gsap && motionEnabled;
 
   if (motionEnabled) document.documentElement.classList.add('motion-enabled');
-
-  const heroActions = document.querySelector('.hero-actions');
-  if (heroActions) {
-    const motionToggle = document.createElement('button');
-    motionToggle.type = 'button';
-    motionToggle.className = 'motion-toggle';
-    motionToggle.setAttribute('aria-pressed', String(motionEnabled));
-    motionToggle.textContent = motionEnabled ? 'إيقاف الحركات' : 'تشغيل الحركات';
-    motionToggle.title = 'يُحفظ هذا الاختيار على جهازك';
-    motionToggle.addEventListener('click', () => {
-      try {
-        window.localStorage.setItem('alarabin-motion-preference', motionEnabled ? 'off' : 'on');
-      } catch (_) {}
-      window.location.reload();
-    });
-    heroActions.insertAdjacentElement('afterend', motionToggle);
-  }
   const progress = document.createElement('div');
   progress.id = 'alarabin-scroll-progress';
   progress.setAttribute('aria-hidden', 'true');
@@ -80,12 +58,33 @@
     }
   }
 
+  const macroScene = document.querySelector('.macro-scene');
+  const macroFocusCopy = document.getElementById('macro-focus-copy');
+  const macroCopy = {
+    protein: 'مصادر بروتين: البيض، الدجاج، السمك، التونة والبقوليات. اختار الكمية من الحاسبة.',
+    carbs: 'مصادر كارب: التمن، البطاطا، الشوفان، المعكرونة والبرغل. اختار الكمية من الحاسبة.',
+    fats: 'دهون صحية: زيت الزيتون، المكسرات والطحينية. احسبها بالغرام لأن سعراتها مركّزة.',
+  };
+  document.querySelectorAll('[data-macro-choice]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const choice = button.dataset.macroChoice;
+      if (!macroCopy[choice] || !macroScene) return;
+      document.querySelectorAll('[data-macro-choice]').forEach((item) => {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      macroScene.dataset.active = choice;
+      if (macroFocusCopy) macroFocusCopy.textContent = macroCopy[choice];
+      macroScene.setAttribute('aria-label', `تصميم ثلاثي الأبعاد لمصادر ${button.textContent.trim()}`);
+    });
+  });
+
   if (!motionEnabled) return;
 
   const revealSelector = [
     '.section-home-head', '.section-tile', '.section-head', '.hero-copy > *', '.hero-art', '.stat',
     '.result-card', '.athlete-card', '.plan-card', '.recipe-card',
     '.home-exercise-card', '.card', '.trainer-card', '.supplement-promo',
+    '.nutrition-showcase', '.macro-card', '.food-source',
   ].join(',');
   const observed = new WeakSet();
   const revealObserver = new IntersectionObserver((entries) => {
@@ -145,6 +144,12 @@
   }
 
   watchReveal(document);
+  if (macroScene && gsapReady) {
+    gsap.fromTo(macroScene,
+      { autoAlpha: 0, y: 18, rotateX: 7 },
+      { autoAlpha: 1, y: 0, rotateX: 0, duration: 0.8, ease: 'power3.out', clearProps: 'opacity,visibility,transform' }
+    );
+  }
   const contentObserver = new MutationObserver((records) => {
     records.forEach((record) => record.addedNodes.forEach((node) => {
       if (node.nodeType === Node.ELEMENT_NODE) watchReveal(node);

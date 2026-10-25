@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alarabin-shell-v14';
+const CACHE_NAME = 'alarabin-shell-v15';
 const APP_ROOT = new URL('./', self.location.href).href;
 const APP_FILES = [APP_ROOT, APP_ROOT + 'manifest.json', APP_ROOT + 'workout-tracker.css', APP_ROOT + 'workout-tracker.js', APP_ROOT + 'site-motion.css', APP_ROOT + 'site-motion.js', APP_ROOT + 'icons/icon-192.png', APP_ROOT + 'icons/icon-512.png', APP_ROOT + 'icons/apple-touch-icon.png'];
 

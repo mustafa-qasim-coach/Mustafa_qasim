@@ -32,40 +32,121 @@ html.lenis body {
   backdrop-filter: blur(14px);
 }
 
-.motion-toggle {
-  display: inline-flex;
+.nutrition-showcase {
+  display: grid;
+  grid-template-columns: minmax(230px, .82fr) minmax(300px, 1.18fr);
+  gap: 24px;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  margin-top: 14px;
-  padding: 7px 12px;
-  border: 1px solid #46533a;
+  margin: 18px 0 20px;
+  padding: clamp(18px, 3vw, 30px);
+  overflow: hidden;
+  border: 1px solid #3a4630;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 78% 20%, #c5f36b13, transparent 42%), linear-gradient(135deg, #1c2219, #131611 72%);
+  box-shadow: inset 0 1px #ffffff08, 0 20px 55px #0003;
+}
+
+.nutrition-showcase-copy h3 { margin: 9px 0 8px; font-size: clamp(20px, 3vw, 27px); }
+.nutrition-showcase-copy > p { color: #aab2a2; font-size: 12px; line-height: 1.9; }
+.macro-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; }
+.macro-choice {
+  padding: 8px 13px;
+  border: 1px solid #3b4634;
   border-radius: 999px;
   background: #171b15;
-  color: #dce9ce;
+  color: #d4ddcd;
   font: 600 11px "IBM Plex Sans Arabic", sans-serif;
   cursor: pointer;
-  transition: border-color .2s ease, background .2s ease, transform .2s ease;
 }
+.macro-choice[aria-pressed="true"] { border-color: #a8d64f; background: #26321c; color: #d6ff8d; box-shadow: 0 0 18px #c5f36b20; }
+.nutrition-showcase-copy .nutrition-showcase-note { margin: 14px 0 0; color: #7f8877; font-size: 10px; }
 
-.motion-toggle::before {
-  width: 7px;
-  height: 7px;
+.macro-scene {
+  position: relative;
+  display: grid;
+  min-height: 340px;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  perspective: 900px;
+  border: 1px solid #343e2d;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 64%, #c5f36b12, transparent 50%), linear-gradient(145deg, #171c15, #11140f);
+  transform-style: preserve-3d;
+}
+.macro-scene::after {
+  position: absolute;
+  right: 12%;
+  bottom: 13%;
+  left: 12%;
+  height: 22px;
   border-radius: 50%;
-  background: #79856c;
+  background: #0009;
+  filter: blur(15px);
   content: "";
+  transform: translateZ(-20px);
 }
+.macro-scene-orbit {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border: 1px solid #c5f36b2a;
+  border-radius: 50%;
+  transform: rotateX(68deg) rotateZ(-20deg) translateZ(-12px);
+}
+.macro-scene-orbit-two { width: 310px; height: 310px; border-color: #ffffff10; transform: rotateX(68deg) rotateZ(38deg) translateZ(-28px); }
+.macro-plate {
+  position: absolute;
+  width: min(55%, 230px);
+  aspect-ratio: 1;
+  border: 9px solid #73834f;
+  border-radius: 50%;
+  background: radial-gradient(circle, #20271c 0 56%, #c5f36b 57% 59%, #e5eccf 60% 66%, #65724b 67% 71%, #a9ba80 72% 74%, #283020 75%);
+  box-shadow: 0 22px 0 #343e2b, 0 36px 34px #0008, inset 0 4px 10px #fff5;
+  transform: rotateX(57deg) rotateZ(-12deg) translateY(10px) translateZ(10px);
+  transform-style: preserve-3d;
+}
+.macro-plate::before,
+.macro-plate::after { position: absolute; border-radius: 50%; content: ""; transform: translateZ(8px); }
+.macro-plate::before { inset: 19%; border: 1px solid #d2e7a166; box-shadow: inset 0 0 20px #c5f36b10; }
+.macro-plate::after { inset: 29%; border: 1px dashed #d2e7a144; }
+.macro-food-card {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  min-width: 125px;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid #ffffff1c;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #272e23ef, #171b15f2);
+  box-shadow: 0 13px 28px #0008, inset 0 1px #ffffff12;
+  text-align: right;
+  transform: translate3d(var(--x, 0), var(--y, 0), var(--z, 25px));
+  transition: opacity .28s ease, border-color .28s ease, box-shadow .28s ease, transform .45s cubic-bezier(.2,.75,.25,1);
+}
+.macro-food-card span { float: right; margin-left: 8px; font-size: 21px; }
+.macro-food-card b { color: #e8f2db; font-size: 11px; }
+.macro-food-card small { color: #97a18e; font-size: 9px; white-space: nowrap; }
+.macro-food-protein { --x: -88px; --y: -64px; --z: 56px; right: 12%; top: 22%; }
+.macro-food-carbs { --x: 74px; --y: 3px; --z: 78px; bottom: 24%; left: 9%; }
+.macro-food-fats { --x: 18px; --y: -15px; --z: 52px; right: 10%; bottom: 17%; }
+.macro-scene[data-active="protein"] .macro-food-protein,
+.macro-scene[data-active="carbs"] .macro-food-carbs,
+.macro-scene[data-active="fats"] .macro-food-fats { border-color: #b9e967a6; box-shadow: 0 0 24px #c5f36b2b, 0 18px 35px #0009; transform: translate3d(var(--x), var(--y), 100px) scale(1.06); }
+.macro-scene[data-active="protein"] .macro-food-carbs,
+.macro-scene[data-active="protein"] .macro-food-fats,
+.macro-scene[data-active="carbs"] .macro-food-protein,
+.macro-scene[data-active="carbs"] .macro-food-fats,
+.macro-scene[data-active="fats"] .macro-food-protein,
+.macro-scene[data-active="fats"] .macro-food-carbs { opacity: .66; }
+.macro-scene-caption { position: absolute; z-index: 3; bottom: 13px; color: #829076; font-size: 10px; letter-spacing: .02em; }
 
-.motion-toggle[aria-pressed="true"]::before {
-  background: var(--lime, #c5f36b);
-  box-shadow: 0 0 10px #c5f36b99;
-}
-
-.motion-toggle:hover {
-  border-color: #91b558;
-  background: #1c2218;
-  transform: translateY(-1px);
-}
+html.motion-enabled .macro-plate { animation: macro-plate-float 5.6s ease-in-out infinite; }
+html.motion-enabled .macro-scene-orbit-one { animation: macro-orbit 17s linear infinite; }
+html.motion-enabled .macro-food-card { animation: macro-food-float 4.8s ease-in-out infinite; }
+html.motion-enabled .macro-food-carbs { animation-delay: -1.6s; }
+html.motion-enabled .macro-food-fats { animation-delay: -3.1s; }
 
 html.motion-enabled .hero-art::before {
   animation: alarabin-ring-glow 6s ease-in-out infinite;
@@ -135,11 +216,30 @@ html.motion-enabled .hero-actions a:active {
   50% { opacity: 1; }
 }
 
+@keyframes macro-plate-float {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -9px; }
+}
+@keyframes macro-orbit { to { transform: rotateX(68deg) rotateZ(340deg) translateZ(-12px); } }
+@keyframes macro-food-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
 @media (max-width: 650px) {
   #alarabin-scroll-progress { height: 2px; }
-  .motion-toggle { margin-top: 11px; }
+  .nutrition-showcase { grid-template-columns: 1fr; gap: 14px; padding: 15px; }
+  .macro-scene { min-height: 300px; }
+  .macro-plate { width: min(54%, 205px); }
+  .macro-food-card { min-width: 112px; padding: 8px 9px; }
+  .macro-food-protein { right: 5%; top: 17%; }
+  .macro-food-carbs { bottom: 22%; left: 3%; }
+  .macro-food-fats { right: 4%; bottom: 12%; }
+  .macro-food-card small { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   #alarabin-scroll-progress { box-shadow: none; }
+  .macro-plate, .macro-scene-orbit-one, .macro-food-card { animation: none !important; }
+  .macro-food-card, .macro-choice { transition: none !important; }
 }
