@@ -1,6 +1,31 @@
 (function () {
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const gsapReady = !!window.gsap && !reducedMotion;
+  const systemPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let savedMotionPreference = null;
+  try {
+    savedMotionPreference = window.localStorage.getItem('alarabin-motion-preference');
+  } catch (_) {}
+  const motionEnabled = savedMotionPreference === 'on'
+    || (savedMotionPreference !== 'off' && !systemPrefersReducedMotion);
+  const gsapReady = !!window.gsap && motionEnabled;
+
+  if (motionEnabled) document.documentElement.classList.add('motion-enabled');
+
+  const heroActions = document.querySelector('.hero-actions');
+  if (heroActions) {
+    const motionToggle = document.createElement('button');
+    motionToggle.type = 'button';
+    motionToggle.className = 'motion-toggle';
+    motionToggle.setAttribute('aria-pressed', String(motionEnabled));
+    motionToggle.textContent = motionEnabled ? 'إيقاف الحركات' : 'تشغيل الحركات';
+    motionToggle.title = 'يُحفظ هذا الاختيار على جهازك';
+    motionToggle.addEventListener('click', () => {
+      try {
+        window.localStorage.setItem('alarabin-motion-preference', motionEnabled ? 'off' : 'on');
+      } catch (_) {}
+      window.location.reload();
+    });
+    heroActions.insertAdjacentElement('afterend', motionToggle);
+  }
   const progress = document.createElement('div');
   progress.id = 'alarabin-scroll-progress';
   progress.setAttribute('aria-hidden', 'true');
@@ -37,7 +62,7 @@
   window.addEventListener('resize', scheduleScrollUI, { passive: true });
   updateScrollUI();
 
-  if (!reducedMotion && typeof window.Lenis === 'function') {
+  if (motionEnabled && typeof window.Lenis === 'function') {
     try {
       window.__alarabinLenis = new Lenis({
         autoRaf: true,
@@ -55,10 +80,10 @@
     }
   }
 
-  if (reducedMotion) return;
+  if (!motionEnabled) return;
 
   const revealSelector = [
-    '.section-home-head', '.section-tile', '.section-head', '.hero-art', '.stat',
+    '.section-home-head', '.section-tile', '.section-head', '.hero-copy > *', '.hero-art', '.stat',
     '.result-card', '.athlete-card', '.plan-card', '.recipe-card',
     '.home-exercise-card', '.card', '.trainer-card', '.supplement-promo',
   ].join(',');
@@ -90,12 +115,12 @@
     entering.forEach((element, index) => {
       const animation = element.animate(
         [
-          { opacity: 0, transform: 'translateY(15px)' },
-          { opacity: 1, transform: 'translateY(0)' },
+          { opacity: 0, transform: 'translateY(22px) scale(.985)' },
+          { opacity: 1, transform: 'translateY(0) scale(1)' },
         ],
         {
-          duration: 480,
-          delay: index * 55,
+          duration: 620,
+          delay: index * 75,
           easing: 'cubic-bezier(.22, 1, .36, 1)',
           fill: 'both',
         }
@@ -131,14 +156,21 @@
   });
 
   const logoOrb = document.querySelector('.hero-art .orb');
-  if (logoOrb && gsapReady) {
-    gsap.to(logoOrb, {
-      y: -7,
-      rotation: 1,
-      duration: 3.2,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true,
-    });
+  if (logoOrb) {
+    if (gsapReady) {
+      gsap.to(logoOrb, {
+        y: -7,
+        rotation: 1,
+        duration: 3.2,
+        ease: 'sine.inOut',
+        repeat: -1,
+        yoyo: true,
+      });
+    } else if (typeof logoOrb.animate === 'function') {
+      logoOrb.animate(
+        [{ transform: 'translateY(0)' }, { transform: 'translateY(-8px)' }, { transform: 'translateY(0)' }],
+        { duration: 3800, iterations: Infinity, easing: 'ease-in-out' }
+      );
+    }
   }
 })();

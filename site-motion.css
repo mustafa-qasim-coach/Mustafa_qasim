@@ -32,8 +32,112 @@ html.lenis body {
   backdrop-filter: blur(14px);
 }
 
+.motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 14px;
+  padding: 7px 12px;
+  border: 1px solid #46533a;
+  border-radius: 999px;
+  background: #171b15;
+  color: #dce9ce;
+  font: 600 11px "IBM Plex Sans Arabic", sans-serif;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.motion-toggle::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #79856c;
+  content: "";
+}
+
+.motion-toggle[aria-pressed="true"]::before {
+  background: var(--lime, #c5f36b);
+  box-shadow: 0 0 10px #c5f36b99;
+}
+
+.motion-toggle:hover {
+  border-color: #91b558;
+  background: #1c2218;
+  transform: translateY(-1px);
+}
+
+html.motion-enabled .hero-art::before {
+  animation: alarabin-ring-glow 6s ease-in-out infinite;
+}
+
+html.motion-enabled .section-tile,
+html.motion-enabled .recipe-card,
+html.motion-enabled .result-card,
+html.motion-enabled .plan-card,
+html.motion-enabled .home-exercise-card,
+html.motion-enabled .home-advice-card,
+html.motion-enabled .supplement-promo {
+  transition: transform .28s cubic-bezier(.2,.75,.25,1),
+    border-color .28s ease, box-shadow .28s ease, background-color .28s ease;
+}
+
+html.motion-enabled .navlinks a {
+  position: relative;
+}
+
+html.motion-enabled .navlinks a::after {
+  position: absolute;
+  right: 0;
+  bottom: -5px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--lime, #c5f36b);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .22s ease;
+}
+
+html.motion-enabled .navlinks a:hover::after,
+html.motion-enabled .navlinks a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+html.motion-enabled button,
+html.motion-enabled .hero-actions a {
+  transition: transform .2s cubic-bezier(.2,.75,.25,1),
+    filter .2s ease, box-shadow .2s ease;
+}
+
+html.motion-enabled button:active,
+html.motion-enabled .hero-actions a:active {
+  transform: scale(.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.motion-enabled .section-tile:hover,
+  html.motion-enabled .recipe-card:hover,
+  html.motion-enabled .result-card:hover,
+  html.motion-enabled .plan-card:hover,
+  html.motion-enabled .home-exercise-card:hover,
+  html.motion-enabled .home-advice-card:hover,
+  html.motion-enabled .supplement-promo:hover {
+    border-color: #758c4b;
+    box-shadow: 0 14px 32px #0005, 0 0 24px #c5f36b12;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes alarabin-ring-glow {
+  0%, 100% { opacity: .65; }
+  50% { opacity: 1; }
+}
+
 @media (max-width: 650px) {
   #alarabin-scroll-progress { height: 2px; }
+  .motion-toggle { margin-top: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
