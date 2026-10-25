@@ -125,27 +125,19 @@
   }
   function updatePlate(event) {
     if (!plateFoodLayer || !plateMealChips) return;
-    const selected = event.detail?.selected || null;
     const meal = Array.isArray(event.detail?.items) ? event.detail.items : [];
+    const lastAdded = meal.length ? meal[meal.length - 1] : null;
     plateFoodLayer.replaceChildren();
     const displayFoods = meal.map((food) => ({ ...food, current: false }));
-    let selectedIndex = -1;
-    if (selected) {
-      for (let i = displayFoods.length - 1; i >= 0; i -= 1) {
-        if (displayFoods[i].id === selected.id) { selectedIndex = i; break; }
-      }
-      if (selectedIndex < 0) displayFoods.unshift({ ...selected, current: true });
-      else displayFoods[selectedIndex].current = true;
-    }
     if (!displayFoods.length) {
       const empty = document.createElement('div');
       empty.className = 'plate-empty-state';
       const icon = document.createElement('span');
       icon.textContent = '🍽️';
       const title = document.createElement('b');
-      title.textContent = 'الصحن جاهز';
+      title.textContent = 'الصحن فارغ';
       const hint = document.createElement('small');
-      hint.textContent = 'اختار أكلة من القائمة';
+      hint.textContent = 'أضف أكلة حتى تظهر هنا';
       empty.append(icon, title, hint);
       plateFoodLayer.append(empty);
     } else {
@@ -172,14 +164,14 @@
       emptyChip.textContent = 'أضف أكلة حتى تظهر هنا';
       plateMealChips.append(emptyChip);
     }
-    if (plateName) plateName.textContent = selected?.name || 'اختار طعاماً من القائمة';
-    if (plateAmount) plateAmount.textContent = selected ? `${selected.grams} ${selected.unit} · معاينة قبل الإضافة` : 'تظهر الكمية هنا';
-    if (plateIcon) plateIcon.textContent = iconForPlate(selected);
+    if (plateName) plateName.textContent = lastAdded?.name || 'ما ضفت أكلة بعد';
+    if (plateAmount) plateAmount.textContent = lastAdded ? `${lastAdded.grams} ${lastAdded.unit} · موجودة بالصحن` : 'أضف أكلة حتى تظهر بالصحن';
+    if (plateIcon) plateIcon.textContent = iconForPlate(lastAdded);
     if (plateCount) plateCount.textContent = `${meal.length} ${meal.length === 1 ? 'صنف بالوجبة' : 'أصناف بالوجبة'}`;
-    window.__alarabinPlateData = { selected, items: meal };
-    window.updateAlarabin3DPlate?.(selected, meal);
-    if (selected && macroScene) {
-      const category = categoryForPlate(selected);
+    window.__alarabinPlateData = { selected: null, items: meal };
+    window.updateAlarabin3DPlate?.(null, meal);
+    if (lastAdded && macroScene) {
+      const category = categoryForPlate(lastAdded);
       if (['protein', 'carbs', 'fats'].includes(category)) {
         macroScene.dataset.active = category;
         window.updateAlarabin3DCategory?.(category);
@@ -187,10 +179,11 @@
           button.setAttribute('aria-pressed', String(button.dataset.macroChoice === category));
         });
       }
-      if (macroFocusCopy) macroFocusCopy.textContent = `${selected.name} · ${selected.grams} ${selected.unit} — ظاهرة بالصحن. أضفها للوجبة حتى تدخل ضمن المجموع.`;
-      macroScene.setAttribute('aria-label', `معاينة ${selected.name} بكمية ${selected.grams} ${selected.unit} على الصحن`);
-    } else if (!selected && macroScene) {
-      macroScene.setAttribute('aria-label', 'صحن تفاعلي يعرض الطعام الذي تختاره ومكونات وجبتك');
+      if (macroFocusCopy) macroFocusCopy.textContent = `آخر صنف أضفته: ${lastAdded.name} · ${lastAdded.grams} ${lastAdded.unit}. الأطعمة تظهر بالصحن بعد إضافتها للوجبة.`;
+      macroScene.setAttribute('aria-label', `صحن الوجبة، آخر صنف أُضيف: ${lastAdded.name} بكمية ${lastAdded.grams} ${lastAdded.unit}`);
+    } else if (macroScene) {
+      if (macroFocusCopy) macroFocusCopy.textContent = 'الصحن يبدأ فارغ. اختار الطعام والكمية واضغط «أضف للوجبة» حتى يظهر بالصحن.';
+      macroScene.setAttribute('aria-label', 'طبق تفاعلي فارغ؛ تظهر فيه الأطعمة بعد إضافتها للوجبة');
     }
   }
   window.addEventListener('alarabin:plate-update', updatePlate);

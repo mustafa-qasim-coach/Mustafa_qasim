@@ -437,9 +437,6 @@ import * as THREE from 'three';
               const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
               return [Math.cos(angle) * 0.57, Math.sin(angle) * 0.49];
             });
-    if (food.current) {
-      addMesh(group, new THREE.RingGeometry(0.38, 0.405, 52), materials.selectedRing, [0, 0.135, 0], [1, 1, 1], [-Math.PI / 2, 0, 0]);
-    }
     const baseY = 0.12;
     group.position.set(layout[index][0], baseY + (animateIn && !reducedMotion ? 0.15 : 0), layout[index][1]);
     const portionScale = count >= 5 ? 0.66 : count === 4 ? 0.76 : count === 3 ? 0.86 : count === 2 ? 0.93 : 1;
@@ -450,18 +447,6 @@ import * as THREE from 'three';
     group.rotation.y = (index * 0.48) + (kind === 'bread' ? -0.2 : 0);
     foodRoot.add(group);
     return group;
-  }
-
-  function addEmptyGarnish() {
-    const garnish = new THREE.Group();
-    ellipsoid(garnish, materials.greens, [-0.25, 0.17, 0], [0.25, 0.045, 0.12], [0.1, -0.5, 0.15]);
-    ellipsoid(garnish, materials.greensLight, [-0.05, 0.18, -0.13], [0.24, 0.045, 0.12], [0.1, 0.3, -0.18]);
-    ellipsoid(garnish, materials.greensDark, [0.16, 0.17, 0.04], [0.25, 0.045, 0.12], [0.1, 0.7, 0.18]);
-    ellipsoid(garnish, materials.tomato, [0.1, 0.19, -0.02], [0.12, 0.095, 0.12]);
-    ellipsoid(garnish, materials.tomato, [-0.17, 0.19, 0.11], [0.09, 0.07, 0.09]);
-    ellipsoid(garnish, materials.fruitYellow, [0.3, 0.16, -0.2], [0.12, 0.03, 0.11], [0.2, -0.2, 0]);
-    garnish.position.set(0, 0.12, 0);
-    foodRoot.add(garnish);
   }
 
   function releaseFoodMeshes() {
@@ -475,14 +460,13 @@ import * as THREE from 'three';
     currentItems = items;
     releaseFoodMeshes();
     if (!items.length) {
-      addEmptyGarnish();
       return;
     }
     const visible = items.slice(-6);
     visible.forEach((food, index) => makePortion(food, index, visible.length, animateIn));
   }
 
-  function updatePlate(selected, items) {
+  function updatePlate(_selected, items) {
     const meal = Array.isArray(items) ? items.filter(item => item && item.name) : [];
     const uniqueMeal = new Map();
     meal.forEach((item, index) => {
@@ -491,24 +475,14 @@ import * as THREE from 'three';
       if (existing) existing.grams = (Number(existing.grams) || 0) + (Number(item.grams) || 0);
       else uniqueMeal.set(key, { ...item, _order: index });
     });
-    let visibleMeal = [...uniqueMeal.values()];
-    if (selected?.name) {
-      const key = selected.id == null ? null : String(selected.id);
-      const found = key == null ? -1 : visibleMeal.findIndex(item => String(item.id) === key);
-      if (found < 0) visibleMeal.unshift({ ...selected, current: true, _order: -1 });
-      else visibleMeal[found] = { ...visibleMeal[found], current: true };
-    }
-    const normalized = [
-      ...visibleMeal.filter(item => item.current),
-      ...visibleMeal.filter(item => !item.current).slice(-3),
-    ].slice(0, 4).map((item, index) => ({ ...item, id: item.id ?? `plate-item-${index}` }));
-    const signature = normalized.map(item => `${item.id}:${item.current ? 'selected' : 'meal'}`).join('|');
+    const normalized = [...uniqueMeal.values()].slice(-4).map((item, index) => ({ ...item, id: item.id ?? `plate-item-${index}` }));
+    const signature = normalized.map(item => `${item.id}:${Number(item.grams) || 0}`).join('|');
     const animateIn = signature !== previousVisualSignature;
     refreshFood(normalized, animateIn);
     previousVisualSignature = signature;
     canvas.setAttribute('aria-label', normalized.length
       ? `معاينة ثلاثية الأبعاد للوجبة: ${normalized.map(item => item.name).join('، ')}`
-      : 'طبق طعام ثلاثي الأبعاد تفاعلي. اختار أكلة حتى تظهر بالصحن.');
+      : 'طبق طعام ثلاثي الأبعاد فارغ. أضف أكلة للوجبة حتى تظهر بالصحن.');
   }
 
   function resize() {
@@ -578,8 +552,8 @@ import * as THREE from 'three';
   };
   buildPlate();
   resize();
-  if (window.__alarabinPlateData) updatePlate(window.__alarabinPlateData.selected, window.__alarabinPlateData.items);
-  else addEmptyGarnish();
+  if (window.__alarabinPlateData) updatePlate(null, window.__alarabinPlateData.items);
+  else updatePlate(null, []);
   sceneCard.classList.add('three-ready');
   stage.setAttribute('aria-busy', 'false');
   const observer = new ResizeObserver(resize);
