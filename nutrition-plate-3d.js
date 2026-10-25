@@ -17,7 +17,7 @@ import * as THREE from 'three';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 40);
-  camera.position.set(0, 1.7, 3.1);
+  camera.position.set(0, 2.7, 3.0);
   camera.lookAt(0, 0.08, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.65));
   renderer.setClearColor(0x000000, 0);
@@ -40,6 +40,83 @@ import * as THREE from 'three';
   scene.add(plateRig);
   const foodRoot = new THREE.Group();
   plateRig.add(foodRoot);
+  const photoFoodTextures = new Map();
+  const photoFoodSlots = {
+    rice: [0, 0], chicken: [1, 0], fish: [2, 0],
+    meat: [0, 1], potato: [1, 1], pasta: [2, 1],
+    eggs: [0, 2], vegetables: [1, 2], fruit: [2, 2],
+  };
+  const photoFoodSizes = {
+    rice: [1.12, 0.94], chicken: [1.14, 0.94], fish: [1.18, 0.86],
+    meat: [1.1, 0.96], potato: [1.12, 0.94], pasta: [1.12, 0.94],
+    eggs: [1.1, 0.93], vegetables: [1.13, 0.96], fruit: [1.13, 0.95],
+  };
+
+  function loadPhotoFoodAtlas() {
+    const atlas = new Image();
+    atlas.decoding = 'async';
+    atlas.onload = () => {
+      const cropInset = 0.018;
+      Object.entries(photoFoodSlots).forEach(([kind, [column, row]]) => {
+        const sourceWidth = atlas.naturalWidth / 3;
+        const sourceHeight = atlas.naturalHeight / 3;
+        const insetX = sourceWidth * cropInset;
+        const insetY = sourceHeight * cropInset;
+        const tile = document.createElement('canvas');
+        tile.width = 512;
+        tile.height = 512;
+        const context = tile.getContext('2d');
+        if (!context) return;
+        context.drawImage(
+          atlas,
+          column * sourceWidth + insetX,
+          row * sourceHeight + insetY,
+          sourceWidth - insetX * 2,
+          sourceHeight - insetY * 2,
+          0, 0, tile.width, tile.height,
+        );
+        const texture = new THREE.CanvasTexture(tile);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+        texture.needsUpdate = true;
+        photoFoodTextures.set(kind, texture);
+      });
+      refreshFood(currentItems, false);
+    };
+    atlas.onerror = () => console.info('Realistic food textures unavailable; using the built-in 3D food models.');
+    atlas.src = new URL('./food-sprites-atlas.png', import.meta.url).href;
+  }
+
+  function addPhotoFood(parent, kind) {
+    const texture = photoFoodTextures.get(kind);
+    if (!texture) return false;
+    const [width, height] = photoFoodSizes[kind] || [0.82, 0.68];
+    const shadow = addMesh(parent, new THREE.CircleGeometry(1, 48), materials.photoShadow, [0, 0.115, 0], [width * 0.46, height * 0.42, 1], [-Math.PI / 2, 0, 0]);
+    shadow.renderOrder = 1;
+    const imageMaterial = new THREE.MeshPhysicalMaterial({
+      map: texture,
+      transparent: true,
+      alphaTest: 0.035,
+      roughness: 0.58,
+      metalness: 0,
+      clearcoat: 0.08,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const servingGeometry = new THREE.PlaneGeometry(width, height, 16, 16);
+    const vertices = servingGeometry.attributes.position;
+    for (let index = 0; index < vertices.count; index += 1) {
+      const x = vertices.getX(index) / (width * 0.5);
+      const y = vertices.getY(index) / (height * 0.5);
+      const mound = Math.max(0, 1 - x * x - y * y);
+      vertices.setZ(index, mound * 0.045);
+    }
+    servingGeometry.computeVertexNormals();
+    const serving = addMesh(parent, servingGeometry, imageMaterial, [0, 0.17, 0], [1, 1, 1], [-Math.PI / 2, 0, 0]);
+    serving.userData.disposeMaterial = true;
+    serving.renderOrder = 2;
+    return true;
+  }
 
   function createFoodTexture({ base, shade, light, fleck, seed = 19, fibers = false }) {
     const surface = document.createElement('canvas');
@@ -119,6 +196,7 @@ import * as THREE from 'three';
     nut: material('#ad7546', 0.76), peanut: material('#d9b77d', 0.82), avocado: material('#91a85b', 0.55), avocadoCore: material('#d8dd8a', 0.5), seed: material('#78523b', 0.55),
     dairy: material('#f2efdc', 0.34), fruitRed: material('#c94f47', 0.42), fruitYellow: material('#e5b541', 0.43), fruitPurple: material('#7861a2', 0.46),
     shadow: new THREE.MeshBasicMaterial({ color: '#050704', transparent: true, opacity: 0.24, depthWrite: false }),
+    photoShadow: new THREE.MeshBasicMaterial({ color: '#241d17', transparent: true, opacity: 0.11, depthWrite: false }),
     selectedRing: new THREE.MeshBasicMaterial({ color: '#c5f36b', transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide }),
   };
   const sphereGeometry = new THREE.SphereGeometry(1, 28, 18);
@@ -411,7 +489,9 @@ import * as THREE from 'three';
     const group = new THREE.Group();
     group.userData.foodId = food.id;
     const kind = detectKind(food);
-    if (kind === 'rice') makeRice(group);
+    const hasPhotoTexture = addPhotoFood(group, kind);
+    if (hasPhotoTexture) { /* The cutout sprite supplies the realistic food surface. */ }
+    else if (kind === 'rice') makeRice(group);
     else if (kind === 'chicken') makeChicken(group);
     else if (kind === 'fish') makeFish(group);
     else if (kind === 'eggs') makeEggs(group);
@@ -452,6 +532,7 @@ import * as THREE from 'three';
   function releaseFoodMeshes() {
     foodRoot.traverse(object => {
       if (object.geometry && !sharedGeometries.has(object.geometry)) object.geometry.dispose();
+      if (object.userData.disposeMaterial && object.material) object.material.dispose();
     });
     foodRoot.clear();
   }
@@ -551,6 +632,7 @@ import * as THREE from 'three';
     limeLight.color.set(tint);
   };
   buildPlate();
+  loadPhotoFoodAtlas();
   resize();
   if (window.__alarabinPlateData) updatePlate(null, window.__alarabinPlateData.items);
   else updatePlate(null, []);
