@@ -78,6 +78,124 @@
     });
   });
 
+  const plateFoodLayer = document.getElementById('plate-food-layer');
+  const plateMealChips = document.getElementById('plate-meal-chips');
+  const plateName = document.getElementById('plate-current-name');
+  const plateAmount = document.getElementById('plate-current-amount');
+  const plateIcon = document.getElementById('plate-current-icon');
+  const plateCount = document.getElementById('plate-food-count');
+  function categoryForPlate(food) {
+    const value = `${food?.category || ''} ${food?.name || ''}`;
+    if (/بروتين|دجاج|صدر|لحم|سمك|تونة|لبن|روب|جبن|بقول|عدس|فاصوليا/i.test(value) || /(?:^|[^\u0621-\u064A])(?:بيض|بياض)(?=$|[^\u0621-\u064A])/u.test(value)) return 'protein';
+    if (/كارب|رز|تمن|خبز|توست|بطاط|شوفان|معكرون|برغل|فاكه|تمر|سكر|عسل/i.test(value)) return 'carbs';
+    if (/دهون|زيت|مكسر|طحيني|فول سوداني|أفوكادو/i.test(value)) return 'fats';
+    return 'other';
+  }
+  function iconForPlate(food) {
+    const name = food?.name || '';
+    if (/دجاج|صدر|لحم|كباب/i.test(name)) return '🥩';
+    if (/سمك|تونة/i.test(name)) return '🐟';
+    if (/(?:^|[^\u0621-\u064A])(?:بيض|بياض)(?=$|[^\u0621-\u064A])/u.test(name)) return '🥚';
+    if (/رز|تمن|برغل/i.test(name)) return '🍚';
+    if (/بطاط/i.test(name)) return '🥔';
+    if (/شوفان/i.test(name)) return '🥣';
+    if (/خبز|توست/i.test(name)) return '🍞';
+    if (/زيت|مكسر|طحيني|فول سوداني/i.test(name)) return '🥜';
+    if (/فاكه|تفاح|موز|تمر/i.test(name)) return '🍎';
+    if (/خضار|سلط|طماط|خيار/i.test(name)) return '🥗';
+    if (/حليب|روب|لبن|جبن/i.test(name)) return '🥛';
+    return '🍽️';
+  }
+  function makePlateToken(food, current = false) {
+    const token = document.createElement('span');
+    token.className = 'plate-food-token';
+    token.dataset.category = categoryForPlate(food);
+    token.dataset.current = String(current);
+    token.title = `${food.name} · ${food.grams} ${food.unit}`;
+    const icon = document.createElement('span');
+    icon.className = 'plate-food-token-icon';
+    icon.textContent = iconForPlate(food);
+    const name = document.createElement('strong');
+    name.textContent = food.name;
+    const amount = document.createElement('small');
+    amount.textContent = `${food.grams} ${food.unit}`;
+    token.append(icon, name, amount);
+    return token;
+  }
+  function updatePlate(event) {
+    if (!plateFoodLayer || !plateMealChips) return;
+    const selected = event.detail?.selected || null;
+    const meal = Array.isArray(event.detail?.items) ? event.detail.items : [];
+    plateFoodLayer.replaceChildren();
+    const displayFoods = meal.map((food) => ({ ...food, current: false }));
+    let selectedIndex = -1;
+    if (selected) {
+      for (let i = displayFoods.length - 1; i >= 0; i -= 1) {
+        if (displayFoods[i].id === selected.id) { selectedIndex = i; break; }
+      }
+      if (selectedIndex < 0) displayFoods.unshift({ ...selected, current: true });
+      else displayFoods[selectedIndex].current = true;
+    }
+    if (!displayFoods.length) {
+      const empty = document.createElement('div');
+      empty.className = 'plate-empty-state';
+      const icon = document.createElement('span');
+      icon.textContent = '🍽️';
+      const title = document.createElement('b');
+      title.textContent = 'الصحن جاهز';
+      const hint = document.createElement('small');
+      hint.textContent = 'اختار أكلة من القائمة';
+      empty.append(icon, title, hint);
+      plateFoodLayer.append(empty);
+    } else {
+      displayFoods.slice(0, 5).forEach((food) => plateFoodLayer.append(makePlateToken(food, food.current)));
+      if (displayFoods.length > 5) {
+        const more = document.createElement('span');
+        more.className = 'plate-token-overflow';
+        more.textContent = `+${displayFoods.length - 5}`;
+        plateFoodLayer.append(more);
+      }
+    }
+    plateMealChips.replaceChildren();
+    if (meal.length) {
+      meal.forEach((food) => {
+        const chip = document.createElement('span');
+        chip.className = 'plate-meal-chip';
+        chip.dataset.category = categoryForPlate(food);
+        chip.textContent = `${food.name} · ${food.grams} ${food.unit}`;
+        plateMealChips.append(chip);
+      });
+    } else {
+      const emptyChip = document.createElement('span');
+      emptyChip.className = 'plate-empty-chip';
+      emptyChip.textContent = 'أضف أكلة حتى تظهر هنا';
+      plateMealChips.append(emptyChip);
+    }
+    if (plateName) plateName.textContent = selected?.name || 'اختار طعاماً من القائمة';
+    if (plateAmount) plateAmount.textContent = selected ? `${selected.grams} ${selected.unit} · معاينة قبل الإضافة` : 'تظهر الكمية هنا';
+    if (plateIcon) plateIcon.textContent = iconForPlate(selected);
+    if (plateCount) plateCount.textContent = `${meal.length} ${meal.length === 1 ? 'صنف بالوجبة' : 'أصناف بالوجبة'}`;
+    if (selected && macroScene) {
+      const category = categoryForPlate(selected);
+      if (['protein', 'carbs', 'fats'].includes(category)) {
+        macroScene.dataset.active = category;
+        document.querySelectorAll('[data-macro-choice]').forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.macroChoice === category));
+        });
+      }
+      if (macroFocusCopy) macroFocusCopy.textContent = `${selected.name} · ${selected.grams} ${selected.unit} — ظاهرة بالصحن. أضفها للوجبة حتى تدخل ضمن المجموع.`;
+      macroScene.setAttribute('aria-label', `معاينة ${selected.name} بكمية ${selected.grams} ${selected.unit} على الصحن`);
+    } else if (!selected && macroScene) {
+      macroScene.setAttribute('aria-label', 'صحن تفاعلي يعرض الطعام الذي تختاره ومكونات وجبتك');
+    }
+  }
+  window.addEventListener('alarabin:plate-update', updatePlate);
+  document.addEventListener('DOMContentLoaded', () => {
+    const foodSelect = document.getElementById('food-select');
+    if (foodSelect?.value) foodSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    else updatePlate({ detail: { selected: null, items: [] } });
+  }, { once: true });
+
   if (!motionEnabled) return;
 
   const revealSelector = [
