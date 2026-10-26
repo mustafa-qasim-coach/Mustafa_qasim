@@ -244,3 +244,29 @@ html.motion-enabled .hero-actions a:active {
   .nutrition-plate-canvas { transition: none !important; }
   .macro-plate, .macro-choice { transition: none !important; }
 }
+.home-exercise-art{border-color:#45563a;background:radial-gradient(ellipse at 50% 42%,#3a4a2e 0%,#20271d 72%);}
+.home-exercise-art svg{overflow:visible;filter:drop-shadow(0 8px 14px #0008);}
+.home-exercise-art svg rect[fill="#171c15"]{fill:#1a2118;stroke:#667b4d;stroke-width:2.5;}
+.home-exercise-art svg .home-art-body-fill{filter:drop-shadow(0 2px 2px #070907b8);}
+.home-exercise-art svg .home-art-body-line{filter:drop-shadow(0 1px 2px #080a07cc);}
+.home-exercise-art:before,.home-exercise-art:after{top:12px;min-height:32px;padding:6px 12px;border-color:#a3c56c;background:#11160feF;color:#eff8df;font-size:12px;box-shadow:0 5px 16px #0009;}
+.home-exercise-art:before{content:"① البداية";left:16px;}
+.home-exercise-art:after{content:"② النهاية";right:16px;}
+.home-exercise-art svg path[marker-end]{stroke-width:5.5px!important;filter:drop-shadow(0 0 6px #c5f36b);}
+
+.body-model-stage{position:relative;isolation:isolate;overflow:hidden;touch-action:pan-y;}
+#body-model-canvas{position:absolute;inset:0;z-index:2;display:none;width:100%;height:100%;outline:none;touch-action:none;cursor:grab;}
+#body-model-canvas.is-dragging{cursor:grabbing;}
+.body-model-stage.three-ready #body-model-canvas{display:block;}
+.body-model-stage.three-ready #body-model-rotator{display:none;}
+.body-model-stage.three-ready:after{display:none;}
+.body-model-face-label{position:absolute;top:12px;left:12px;z-index:3;display:none;padding:7px 11px;border:1px solid #708851;border-radius:999px;background:#10150fe8;color:#e7f4d2;font-size:11px;font-weight:800;box-shadow:0 5px 14px #0007;pointer-events:none;}
+.body-model-stage.three-ready .body-model-face-label{display:block;}
+.body-model-stage.three-ready{background:radial-gradient(ellipse at 50% 44%,#596a3b42,transparent 39%),radial-gradient(ellipse at 50% 74%,#283423,#0e110d 74%);}
+
+@media(max-width:650px){
+  .home-exercise-art{min-height:188px;padding:10px 7px;}
+  .home-exercise-art svg{min-height:168px;}
+  .home-exercise-art:before,.home-exercise-art:after{top:9px;min-height:28px;padding:4px 8px;font-size:10px;}
+  .body-model-face-label{top:8px;left:8px;font-size:10px;}
+}
