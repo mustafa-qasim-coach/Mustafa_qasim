@@ -91,28 +91,32 @@ import * as THREE from 'three';
     const texture = photoFoodTextures.get(kind);
     if (!texture) return false;
     const [width, height] = photoFoodSizes[kind] || [0.82, 0.68];
-    const shadow = addMesh(parent, new THREE.CircleGeometry(1, 48), materials.photoShadow, [0, 0.115, 0], [width * 0.46, height * 0.42, 1], [-Math.PI / 2, 0, 0]);
+    const shadow = addMesh(parent, new THREE.CircleGeometry(1, 48), materials.photoShadow, [0, 0.108, 0], [width * 0.46, height * 0.42, 1], [-Math.PI / 2, 0, 0]);
     shadow.renderOrder = 1;
+    const mound = ellipsoid(parent, photoFoodBases[kind] || photoFoodBases.vegetables,
+      [0, 0.145, 0], [width * 0.405, 0.074, height * 0.36]);
+    mound.renderOrder = 1;
     const imageMaterial = new THREE.MeshPhysicalMaterial({
       map: texture,
       transparent: true,
-      alphaTest: 0.035,
-      roughness: 0.58,
+      alphaTest: 0.025,
+      roughness: 0.49,
       metalness: 0,
-      clearcoat: 0.08,
+      clearcoat: 0.16,
+      clearcoatRoughness: 0.44,
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const servingGeometry = new THREE.PlaneGeometry(width, height, 16, 16);
+    const servingGeometry = new THREE.PlaneGeometry(width, height, 32, 32);
     const vertices = servingGeometry.attributes.position;
     for (let index = 0; index < vertices.count; index += 1) {
       const x = vertices.getX(index) / (width * 0.5);
       const y = vertices.getY(index) / (height * 0.5);
       const mound = Math.max(0, 1 - x * x - y * y);
-      vertices.setZ(index, mound * 0.045);
+      vertices.setZ(index, Math.pow(mound, 0.72) * 0.09);
     }
     servingGeometry.computeVertexNormals();
-    const serving = addMesh(parent, servingGeometry, imageMaterial, [0, 0.17, 0], [1, 1, 1], [-Math.PI / 2, 0, 0]);
+    const serving = addMesh(parent, servingGeometry, imageMaterial, [0, 0.16, 0], [1, 1, 1], [-Math.PI / 2, 0, 0]);
     serving.userData.disposeMaterial = true;
     serving.renderOrder = 2;
     return true;
@@ -199,6 +203,13 @@ import * as THREE from 'three';
     photoShadow: new THREE.MeshBasicMaterial({ color: '#241d17', transparent: true, opacity: 0.11, depthWrite: false }),
     selectedRing: new THREE.MeshBasicMaterial({ color: '#c5f36b', transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide }),
   };
+  const photoFoodBases = Object.fromEntries(Object.entries({
+    rice: '#e7d5af', chicken: '#966039', fish: '#cb7159', meat: '#704332',
+    potato: '#b98d4d', pasta: '#c98539', eggs: '#eee3cd',
+    vegetables: '#547b3f', fruit: '#9f4c50',
+  }).map(([kind, color]) => [kind, new THREE.MeshPhysicalMaterial({
+    color, roughness: 0.74, clearcoat: 0.035, side: THREE.DoubleSide,
+  })]));
   const sphereGeometry = new THREE.SphereGeometry(1, 28, 18);
   const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 24, 1);
   const sharedGeometries = new Set([sphereGeometry, cylinderGeometry]);
