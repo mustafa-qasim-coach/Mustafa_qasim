@@ -1,4 +1,49 @@
 (function(){
+  const accessStorageKey='alarabin-library-access-v1';
+  const memberStorageKey='alarabin-member-name-v1';
+  function normalizeCode(value){return String(value||'').trim().replace(/\s+/g,'').toUpperCase()}
+  function normalizedName(value){return String(value||'').trim().replace(/\s+/g,' ')}
+  function hasFullName(value){return normalizedName(value).split(' ').filter(Boolean).length>=2}
+  function restoreRememberedMember(){
+    try{
+      const name=localStorage.getItem(memberStorageKey)||'';
+      const savedCode=localStorage.getItem(accessStorageKey)||'';
+      if(!savedCode||!hasFullName(name))return;
+      sessionStorage.setItem(memberStorageKey,normalizedName(name));
+      window.setTimeout(function(){
+        if(typeof window.syncLibraryGate==='function')window.syncLibraryGate();
+        else window.dispatchEvent(new Event('hashchange'));
+      },0);
+    }catch(error){}
+  }
+  function rememberAfterSuccessfulUnlock(){
+    try{
+      const nameField=document.getElementById('library-member-name');
+      const codeField=document.getElementById('library-access-code');
+      if(!nameField||!codeField)return;
+      const name=normalizedName(nameField.value);
+      const savedCode=localStorage.getItem(accessStorageKey)||'';
+      if(!hasFullName(name)||!savedCode||normalizeCode(savedCode)!==normalizeCode(codeField.value))return;
+      localStorage.setItem(memberStorageKey,name);
+      sessionStorage.setItem(memberStorageKey,name);
+    }catch(error){}
+  }
+  const loginForm=document.getElementById('library-unlock-form');
+  if(loginForm)loginForm.addEventListener('submit',function(){window.setTimeout(rememberAfterSuccessfulUnlock,0)});
+  restoreRememberedMember();
+  document.addEventListener('click',function(event){
+    const button=event.target&&event.target.closest&&event.target.closest('#workout-member-logout');
+    if(!button)return;
+    try{
+      localStorage.removeItem(accessStorageKey);
+      localStorage.removeItem(memberStorageKey);
+      sessionStorage.removeItem(memberStorageKey);
+    }catch(error){}
+    if(typeof window.syncLibraryGate==='function')window.syncLibraryGate();
+    else window.location.reload();
+  });
+})();
+(function(){
   const protectedArea=document.getElementById('library-protected-content');
   const anchor=protectedArea&&protectedArea.querySelector('.section-head');
   if(!anchor)return;
@@ -6,7 +51,7 @@
   const panel=document.createElement('section');
   panel.className='workout-tracker';
   panel.setAttribute('aria-labelledby','workout-tracker-title');
-  panel.innerHTML='<div class="workout-tracker-head"><div><h3 class="workout-tracker-title" id="workout-tracker-title">سجّل أوزانك وتابع تطورك</h3><p class="workout-tracker-subtitle">سجل بسيط لكل تمرين، ينحفظ على هذا الجهاز حتى لو انقطع الإنترنت.</p></div><span class="workout-tracker-pill">سجلّك الشخصي</span><button class="workout-member-notify" id="workout-member-notify" type="button">إرسال اسمي للمدرب</button></div><form id="workout-tracker-form"><div class="workout-tracker-grid"><label class="workout-tracker-field">اسم التمرين<input id="workout-exercise" name="exercise" list="workout-exercise-options" type="text" maxlength="90" placeholder="مثال: بنج برس مستوي" required></label><label class="workout-tracker-field">وزن آخر جلسة (كغم)<input id="workout-last-weight" name="lastWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="اتركه فارغاً إذا أول جلسة"></label><label class="workout-tracker-field">وزن هذا الأسبوع (كغم)<input id="workout-week-weight" name="weekWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="مثال: 40" required></label><label class="workout-tracker-field">وزنك الحالي (كغم)<input id="workout-current-weight" name="currentWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="مثال: 42.5" required></label><label class="workout-tracker-field">العدات<input id="workout-reps" name="reps" type="number" min="1" max="200" step="1" inputmode="numeric" placeholder="مثال: 10" required></label></div><div class="workout-tracker-actions"><button class="workout-tracker-save" id="workout-tracker-save" type="submit">حفظ سجل التمرين</button><button class="workout-tracker-cancel" id="workout-tracker-cancel" type="button" hidden>إلغاء التعديل</button><p class="workout-tracker-status" id="workout-tracker-status" role="status" aria-live="polite"></p></div></form><datalist id="workout-exercise-options"></datalist><div class="workout-history"><div class="workout-history-head"><h3>سجلاتك السابقة</h3><span class="workout-history-count" id="workout-history-count">0 سجل</span></div><ul class="workout-history-list" id="workout-history-list"></ul><p class="workout-history-empty" id="workout-history-empty">بعد ما مسجل أوزان. سجّل تمرينك الأول من الخانات أعلاه.</p><div class="workout-checkin"><div class="workout-checkin-head"><strong>متابعة الأوزان كل 10 أيام</strong><span id="workout-checkin-next">سجّل أول تمرين حتى يبدأ موعد المتابعة.</span></div><button class="workout-checkin-send" id="workout-checkin-send" type="button" disabled>إرسال أوزاني للمتابعة</button><button class="workout-checkin-confirm" id="workout-checkin-confirm" type="button" hidden>أكدت إرسال المتابعة</button><p id="workout-checkin-status" role="status" aria-live="polite">زر المتابعة يرسل السجلات الجديدة فقط إلى واتساب بعد ضغطك على إرسال.</p></div></div>';
+  panel.innerHTML='<div class="workout-tracker-head"><div><h3 class="workout-tracker-title" id="workout-tracker-title">سجّل أوزانك وتابع تطورك</h3><p class="workout-tracker-subtitle">سجل بسيط لكل تمرين، ينحفظ على هذا الجهاز حتى لو انقطع الإنترنت.</p></div><span class="workout-tracker-pill">سجلّك الشخصي</span><button class="workout-member-notify" id="workout-member-notify" type="button">إرسال اسمي للمدرب</button><button class="workout-member-logout" id="workout-member-logout" type="button" aria-label="نسيان تسجيل الدخول من هذا الجهاز">تسجيل خروج من هذا الجهاز</button></div><form id="workout-tracker-form"><div class="workout-tracker-grid"><label class="workout-tracker-field">اسم التمرين<input id="workout-exercise" name="exercise" list="workout-exercise-options" type="text" maxlength="90" placeholder="مثال: بنج برس مستوي" required></label><label class="workout-tracker-field">وزن آخر جلسة (كغم)<input id="workout-last-weight" name="lastWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="اتركه فارغاً إذا أول جلسة"></label><label class="workout-tracker-field">وزن هذا الأسبوع (كغم)<input id="workout-week-weight" name="weekWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="مثال: 40" required></label><label class="workout-tracker-field">وزنك الحالي (كغم)<input id="workout-current-weight" name="currentWeight" type="number" min="0" max="9999" step="0.25" inputmode="decimal" placeholder="مثال: 42.5" required></label><label class="workout-tracker-field">العدات<input id="workout-reps" name="reps" type="number" min="1" max="200" step="1" inputmode="numeric" placeholder="مثال: 10" required></label></div><div class="workout-tracker-actions"><button class="workout-tracker-save" id="workout-tracker-save" type="submit">حفظ سجل التمرين</button><button class="workout-tracker-cancel" id="workout-tracker-cancel" type="button" hidden>إلغاء التعديل</button><p class="workout-tracker-status" id="workout-tracker-status" role="status" aria-live="polite"></p></div></form><datalist id="workout-exercise-options"></datalist><div class="workout-history"><div class="workout-history-head"><h3>سجلاتك السابقة</h3><span class="workout-history-count" id="workout-history-count">0 سجل</span></div><ul class="workout-history-list" id="workout-history-list"></ul><p class="workout-history-empty" id="workout-history-empty">بعد ما مسجل أوزان. سجّل تمرينك الأول من الخانات أعلاه.</p><div class="workout-checkin"><div class="workout-checkin-head"><strong>متابعة الأوزان كل 10 أيام</strong><span id="workout-checkin-next">سجّل أول تمرين حتى يبدأ موعد المتابعة.</span></div><button class="workout-checkin-send" id="workout-checkin-send" type="button" disabled>إرسال أوزاني للمتابعة</button><button class="workout-checkin-confirm" id="workout-checkin-confirm" type="button" hidden>أكدت إرسال المتابعة</button><p id="workout-checkin-status" role="status" aria-live="polite">زر المتابعة يرسل السجلات الجديدة فقط إلى واتساب بعد ضغطك على إرسال.</p></div></div>';
   anchor.insertAdjacentElement('afterend',panel);
 
   const form=panel.querySelector('#workout-tracker-form');
