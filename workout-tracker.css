@@ -45,3 +45,7 @@
 @media(max-width:900px){.workout-tracker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:600px){.workout-tracker{padding:15px;border-radius:16px}.workout-tracker-head{gap:8px;flex-wrap:wrap}.workout-tracker-pill{font-size:9px;padding:4px 8px}.workout-member-notify{width:100%}.workout-tracker-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.workout-tracker-field:first-child{grid-column:1/-1}.workout-tracker-actions{align-items:stretch;flex-direction:column}.workout-tracker-save,.workout-tracker-cancel{width:100%}.workout-history-item{flex-direction:column}.workout-history-values{justify-content:flex-start;max-width:100%}.workout-history-controls{align-self:flex-start}}
 @media(max-width:600px){.workout-checkin-head{align-items:flex-start;flex-direction:column}.workout-checkin-send,.workout-checkin-confirm{width:100%;margin:0}.workout-checkin-confirm{margin-top:7px}}
+
+.workout-member-logout{flex:none;padding:7px 10px;border:1px solid #594039;border-radius:10px;background:#201714;color:#efc0ae;font:700 10px "IBM Plex Sans Arabic",sans-serif}
+.workout-member-logout:hover{border-color:#eaa18a;color:#ffd0c0}
+@media(max-width:600px){.workout-member-logout{width:100%}}
